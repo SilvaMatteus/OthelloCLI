@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <ncurses.h>
 
 char display_board[38][53] = {
 
@@ -41,6 +42,7 @@ char display_board[38][53] = {
 };
 
 void print_display_board() {
+    printf( "\033[2J\033[1;1H" ); // These ANSI escape codes clear the entire scren and move the cursor.
     for ( int i = 0; i < 34; i++ ) {
         for ( int j = 0; j < 53; j++ ) {
             printf( "%c", display_board[i][j] ); 

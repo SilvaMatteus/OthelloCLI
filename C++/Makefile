@@ -7,7 +7,6 @@ APP_NAME= othello_cli
 
 othello_cli:
 	$(CC) $(CXX_FILES) $(DEPS) -o $(APP_NAME)  $< $(CFLAGS)
-
 .PHONY: clean
 
 clean:
