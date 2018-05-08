@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <cstdlib>
+#include <string.h>
 
 
 #define SAFE_FREE( ptr ) { if ( ( NULL !=  ptr )  && ( nullptr != ptr ) ) { free( ptr ); ( ptr ) = NULL; } }
@@ -21,7 +22,6 @@ position_t transformation_matrix[8][8] = {
 };
 
 char display_board[38][53] = {
-
 	{' ', ' ', ' ', ' ', ' ', ' ', ' ', 'A', ' ', ' ', ' ', ' ', ' ', 'B', ' ', ' ', ' ', ' ', ' ', 'C', ' ', ' ', ' ', ' ', ' ', 'D', ' ', ' ', ' ', ' ', ' ', 'E', ' ', ' ', ' ', ' ', ' ', 'F', ' ', ' ', ' ', ' ', ' ', 'G', ' ', ' ', ' ', ' ', ' ', 'H', ' ', ' ', ' '},
 	{' ', ' ', ' ', ' ', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'}, 
 	{' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#'},
@@ -84,8 +84,14 @@ void print_display_board() {
 }
 
 
-void update_display_board(char board[7][7]) {
-	
+void update_display_board(char board[8][8]) {
+	for ( int i = 0; i < 8; i++ ) {
+		for (int j = 0; j < 8; j++ ) {
+			if ( board[i][j] != ' ' ) {
+				display_board[transformation_matrix[i][j].line_pos][transformation_matrix[i][j].column_pos] = board[i][j];
+			}
+		}
+	}
 }
     //"displayRow"...converts the standard board coordinates to display coordinates
 	//i.e. the 0th row of the real board is equivalent to the 3th row of the display board just by how I've set it up
