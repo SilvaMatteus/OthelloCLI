@@ -1,5 +1,24 @@
 #include <stdio.h>
-#include <ncurses.h>
+#include <cstdlib>
+
+
+#define SAFE_FREE( ptr ) { if ( ( NULL !=  ptr )  && ( nullptr != ptr ) ) { free( ptr ); ( ptr ) = NULL; } }
+
+typedef struct position_t {
+	int line_pos;
+	int column_pos;
+} position_t;
+
+position_t transformation_matrix[8][8] = {
+	{ position_t{  3, 7 }, position_t{  3, 13 }, position_t{  3, 19 }, position_t{  3, 25 }, position_t{  3, 31 }, position_t{  3, 37 }, position_t{  3, 43 }, position_t{  3, 49 } },
+	{ position_t{  7, 7 }, position_t{  7, 13 }, position_t{  7, 19 }, position_t{  7, 25 }, position_t{  7, 31 }, position_t{  7, 37 }, position_t{  7, 43 }, position_t{  7, 49 } },
+	{ position_t{ 11, 7 }, position_t{ 11, 13 }, position_t{ 11, 19 }, position_t{ 11, 25 }, position_t{ 11, 31 }, position_t{ 11, 37 }, position_t{ 11, 43 }, position_t{ 11, 49 } },
+	{ position_t{ 15, 7 }, position_t{ 15, 13 }, position_t{ 15, 19 }, position_t{ 15, 25 }, position_t{ 15, 31 }, position_t{ 15, 37 }, position_t{ 15, 43 }, position_t{ 15, 49 } },
+	{ position_t{ 19, 7 }, position_t{ 19, 13 }, position_t{ 19, 19 }, position_t{ 19, 25 }, position_t{ 19, 31 }, position_t{ 19, 37 }, position_t{ 19, 43 }, position_t{ 19, 49 } },
+	{ position_t{ 31, 7 }, position_t{ 31, 13 }, position_t{ 31, 19 }, position_t{ 31, 25 }, position_t{ 31, 31 }, position_t{ 31, 37 }, position_t{ 31, 43 }, position_t{ 31, 49 } },
+	{ position_t{ 23, 7 }, position_t{ 23, 13 }, position_t{ 23, 19 }, position_t{ 23, 25 }, position_t{ 23, 31 }, position_t{ 23, 37 }, position_t{ 23, 43 }, position_t{ 23, 49 } },
+	{ position_t{ 27, 7 }, position_t{ 27, 13 }, position_t{ 27, 19 }, position_t{ 27, 25 }, position_t{ 27, 31 }, position_t{ 27, 37 }, position_t{ 27, 43 }, position_t{ 27, 49 } },
+};
 
 char display_board[38][53] = {
 
@@ -36,13 +55,25 @@ char display_board[38][53] = {
 	{' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#'},
 	{' ', ' ', '0', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#'},
 	{' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#'},
-	{' ', ' ', ' ', ' ', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'}, 
-
-
+	{' ', ' ', ' ', ' ', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'},
 };
 
+
+void show_header() {
+	FILE *header = fopen ( "logo.txt", "r" );
+	char *str_header = (char *) calloc( 91, 1 );
+	for ( int i = 0; i < 7; i++ ) {
+		fgets ( str_header , 90, header );
+		printf( "%s", str_header );
+	}
+	SAFE_FREE( str_header );
+	fclose(header);
+}
+
+
 void print_display_board() {
-    printf( "\033[2J\033[1;1H" ); // These ANSI escape codes clear the entire scren and move the cursor.
+    printf( "\033[2J\033[1;1H" ); // These ANSI escape codes clear the entire screen and move the cursor.
+	show_header();
     for ( int i = 0; i < 34; i++ ) {
         for ( int j = 0; j < 53; j++ ) {
             printf( "%c", display_board[i][j] ); 
@@ -52,6 +83,29 @@ void print_display_board() {
     printf( "Enter your next move: \n" );
 }
 
-void update_display_board() {
-    
+
+void update_display_board(char board[7][7]) {
+	
 }
+    //"displayRow"...converts the standard board coordinates to display coordinates
+	//i.e. the 0th row of the real board is equivalent to the 3th row of the display board just by how I've set it up
+
+	// int dR7 = 31;
+	// int dR6 = 27;
+	// int dR5 = 23;
+	// int dR4 = 19;
+	// int dR3 = 15;
+	// int dR2 = 11;
+	// int dR1 = 7;
+	// int dR0 = 3;
+
+	//"displayColumn"
+
+	// int dC0 = 7;
+	// int dC1 = 13;
+	// int dC2 = 19;
+	// int dC3 = 25;
+	// int dC4 = 31;
+	// int dC5 = 37;
+	// int dC6 = 43;
+	// int dC7 = 49;

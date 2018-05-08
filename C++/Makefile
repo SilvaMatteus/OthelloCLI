@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-I.
+CFLAGS= -std=c++11 -I.
 CXX_FILES= othello.cpp
 DEPS = display_board.hpp
 
