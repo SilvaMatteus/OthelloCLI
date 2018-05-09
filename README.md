@@ -17,6 +17,10 @@ To compile:
 
 `make`
 
+Compile in debug mode:
+
+`make DEBUG=1`
+
 To remove binary files:
 
 
