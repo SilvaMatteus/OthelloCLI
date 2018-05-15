@@ -91,6 +91,7 @@ int make_move( int move_line, int move_column ) {
     error_status += check_secondary_diagonal( move_line, move_column, player_cell, adversary_cell );
     if ( error_status == ERROR_INVALID_MOVE )
         return ERROR_INVALID_MOVE;
+    return 0;
 }
 
 char check_winner() {
