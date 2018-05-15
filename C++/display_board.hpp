@@ -2,7 +2,8 @@
 #include <cstdlib>
 #include <string.h>
 
-
+// These ANSI escape codes clear the entire screen and move the cursor.
+#define CLEAR_DISPLAY "\033[2J\033[1;1H"
 #define SAFE_FREE( ptr ) { if ( ( NULL !=  ptr )  && ( nullptr != ptr ) ) { free( ptr ); ( ptr ) = NULL; } }
 
 typedef struct position_t {
@@ -71,8 +72,13 @@ void show_header() {
 }
 
 
+void display_victory_message() {
+	
+}
+
+
 void print_display_board() {
-    printf( "\033[2J\033[1;1H" ); // These ANSI escape codes clear the entire screen and move the cursor.
+    printf( CLEAR_DISPLAY );
 	show_header();
     for ( int i = 0; i < 34; i++ ) {
         for ( int j = 0; j < 53; j++ ) {
@@ -80,7 +86,6 @@ void print_display_board() {
         }
         printf( "\n" );
     }
-    printf( "Enter your next move: \n" );
 }
 
 
@@ -93,25 +98,3 @@ void update_display_board(char board[8][8]) {
 		}
 	}
 }
-    //"displayRow"...converts the standard board coordinates to display coordinates
-	//i.e. the 0th row of the real board is equivalent to the 3th row of the display board just by how I've set it up
-
-	// int dR7 = 31;
-	// int dR6 = 27;
-	// int dR5 = 23;
-	// int dR4 = 19;
-	// int dR3 = 15;
-	// int dR2 = 11;
-	// int dR1 = 7;
-	// int dR0 = 3;
-
-	//"displayColumn"
-
-	// int dC0 = 7;
-	// int dC1 = 13;
-	// int dC2 = 19;
-	// int dC3 = 25;
-	// int dC4 = 31;
-	// int dC5 = 37;
-	// int dC6 = 43;
-	// int dC7 = 49;
