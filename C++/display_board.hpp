@@ -75,7 +75,7 @@ void show_header() {
 
 
 void display_victory_message( char winner ) {
-	printf( "Congrats player %c!!! You won!!" );
+	printf( "Congrats player %c!!! You won!!", winner );
 }
 
 void print_invalid_move() {
