@@ -74,12 +74,12 @@ void show_header() {
 }
 
 
-void display_victory_message() {
-	
+void display_victory_message( char winner ) {
+	printf( "Congrats player %c!!! You won!!" );
 }
 
 void print_invalid_move() {
-	printf( "Invalid move!, try again!" );
+	printf( "Invalid move!, try again!\n" );
 }
 
 void print_display_board() {

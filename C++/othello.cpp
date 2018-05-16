@@ -476,13 +476,10 @@ void start_game_loop() {
         printf("\n>> Movement: [ %d, %d ].\n", move_line, move_column);
 #endif
     }
-    display_victory_message();
+    display_victory_message( winner );
 }
 
 
 int main() {
-    // update_display_board(test);
-    // print_display_board();
-
     start_game_loop();
 }
