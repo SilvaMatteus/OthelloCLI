@@ -19,9 +19,9 @@ position_t transformation_matrix[8][8] = {
 	{ position_t{ 11, 7 }, position_t{ 11, 13 }, position_t{ 11, 19 }, position_t{ 11, 25 }, position_t{ 11, 31 }, position_t{ 11, 37 }, position_t{ 11, 43 }, position_t{ 11, 49 } },
 	{ position_t{ 15, 7 }, position_t{ 15, 13 }, position_t{ 15, 19 }, position_t{ 15, 25 }, position_t{ 15, 31 }, position_t{ 15, 37 }, position_t{ 15, 43 }, position_t{ 15, 49 } },
 	{ position_t{ 19, 7 }, position_t{ 19, 13 }, position_t{ 19, 19 }, position_t{ 19, 25 }, position_t{ 19, 31 }, position_t{ 19, 37 }, position_t{ 19, 43 }, position_t{ 19, 49 } },
-	{ position_t{ 31, 7 }, position_t{ 31, 13 }, position_t{ 31, 19 }, position_t{ 31, 25 }, position_t{ 31, 31 }, position_t{ 31, 37 }, position_t{ 31, 43 }, position_t{ 31, 49 } },
 	{ position_t{ 23, 7 }, position_t{ 23, 13 }, position_t{ 23, 19 }, position_t{ 23, 25 }, position_t{ 23, 31 }, position_t{ 23, 37 }, position_t{ 23, 43 }, position_t{ 23, 49 } },
 	{ position_t{ 27, 7 }, position_t{ 27, 13 }, position_t{ 27, 19 }, position_t{ 27, 25 }, position_t{ 27, 31 }, position_t{ 27, 37 }, position_t{ 27, 43 }, position_t{ 27, 49 } },
+	{ position_t{ 31, 7 }, position_t{ 31, 13 }, position_t{ 31, 19 }, position_t{ 31, 25 }, position_t{ 31, 31 }, position_t{ 31, 37 }, position_t{ 31, 43 }, position_t{ 31, 49 } },
 };
 
 char display_board[38][53] = {

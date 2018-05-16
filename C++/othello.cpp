@@ -29,6 +29,22 @@ bool is_x_turn = true;
 // Count possible moves efficiently
 int movements_remaining = ( 8 * 8 ) - 4;
 
+#ifdef DEBUG_MODE
+void show_raw_board() {
+    printf("\nRAW BOARD:\n························\n");
+    for ( int i = 0; i < 8; i ++ ) {
+        for ( int j = 0; j < 8; j++ ) {
+            if ( board_map[i][j] == ' ' )
+                printf( " - " );
+            else
+                printf( " %c ", board_map[i][j] );
+        }
+        printf("\n");
+    }
+    printf("························\n");
+}
+#endif
+
 void get_movement_stdin( int *p_line, int *p_column )
 {
     if ( is_x_turn )
@@ -91,10 +107,16 @@ int check_line( int move_line,
     }
 
     if ( has_valid_move_right ) {
+#ifdef DEBUG_MODE
+        printf( "\n[ %s ] -> (FINAL INDEX RIGHT: %d) -> Player %c\n", __FUNCTION__, final_index_right, player_cell );
+#endif
         for ( j = move_column + 1; j <= final_index_right; j++ )
             board_map[move_line][j] = player_cell;
     }
     if ( has_valid_move_left ) {
+#ifdef DEBUG_MODE
+        printf( "\n[ %s ] -> (FINAL INDEX LEFT: %d) -> Player %c\n", __FUNCTION__, final_index_left, player_cell );
+#endif
         for ( j = move_column -1; j >= final_index_left; j-- )
             board_map[move_line][j] = player_cell;
     }
@@ -107,7 +129,71 @@ int check_column( int move_line,
                 int move_column,
                 char player_cell,
                 char adversary_cell ) {
-    // TODO: Implement!
+
+#ifdef DEBUG_MODE
+    printf( "\n[ %s ] -> (%d, %d) -> Player %c\n", __FUNCTION__, move_line, move_column, player_cell );
+#endif
+    bool has_valid_move_down = false;
+    bool has_adversary_pieces = false;
+    int final_index_down = 0;
+
+    // Check bellow.
+    int i;
+    for ( i = move_line + 1; i < 8; i++ ) {
+        if ( board_map[i][move_column] == player_cell && !has_adversary_pieces )
+            break;
+        if ( board_map[i][move_column] == player_cell && has_adversary_pieces ) {
+            has_valid_move_down = true;
+            final_index_down = i - 1;
+            break;
+        }
+        if ( board_map[i][move_column] == adversary_cell ) {
+            has_adversary_pieces = true;
+        }
+    }
+
+    bool has_valid_move_up = false;
+    has_adversary_pieces = false;
+    int final_index_up = 0;
+
+    // Check up.
+    for ( i = move_line - 1; i > -1; i-- ) {
+        if ( board_map[i][move_column] == player_cell && !has_adversary_pieces )
+            break;
+        if ( board_map[i][move_column] == player_cell && has_adversary_pieces ) {
+            has_valid_move_up = true;
+            final_index_up = i + 1;
+            break;
+        }
+        if ( board_map[i][move_column] == adversary_cell ) {
+            has_adversary_pieces = true;
+        }
+    }
+
+    if ( !has_valid_move_up && !has_valid_move_down ) {
+#ifdef DEBUG_MODE
+        printf( "\n[ %s ] ->  NO VALID MOVE \n", __FUNCTION__ );
+#endif
+        return ERROR_INVALID_POSITION;
+    }
+
+    if ( has_valid_move_down ) {
+#ifdef DEBUG_MODE
+        printf( "\n[ %s ] -> (FINAL INDEX DOWN: %d) -> Player %c\n", __FUNCTION__, final_index_down, player_cell );
+#endif
+        for ( i = move_line + 1; i <= final_index_down; i++ )
+            board_map[i][move_column] = player_cell;
+    }
+    if ( has_valid_move_up ) {
+#ifdef DEBUG_MODE
+        printf( "\n[ %s ] -> (FINAL INDEX UP: %d) -> Player %c\n", __FUNCTION__, final_index_up, player_cell );
+#endif
+        for ( i = move_line -1 ; i >= final_index_up; i-- )
+            board_map[i][move_column] = player_cell;
+    }
+
+    printf( "\n[ %s ] DEBUG -> (%d, %d) -> Player %c\n", __FUNCTION__, move_line, move_column, player_cell );
+    board_map[move_line][move_column] = player_cell;
     return 0;
 }
 
@@ -192,6 +278,9 @@ void start_game_loop() {
             print_invalid_move();
             continue;
         }
+#ifdef DEBUG_MODE
+        show_raw_board();
+#endif
         // If there is no move, count the cells to announce the winner.
         if ( movements_remaining == NO_MOVEMENT_REMAINING ) {
             winner = check_winner();
