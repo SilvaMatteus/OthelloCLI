@@ -9,10 +9,13 @@
 #define NO_MOVEMENT_REMAINING        0
 #define ERROR_INVALID_MOVE          -4
 
+#define PLAYER_X                   'X'
+#define PLAYER_O                   'O'
+
 #define SAFE_FREE( ptr ) { if ( ( NULL !=  ptr )  && ( nullptr != ptr ) ) { free( ptr ); ( ptr ) = NULL; } }
 
 // The board map is configured with the initial position
-char board_map[8][8] = {
+char board_map[MAX_LINE_INDEX + 1][MAX_COLUMN_INDEX + 1] = {
     {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
     {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
     {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -27,13 +30,13 @@ char board_map[8][8] = {
 bool is_x_turn = true;
 
 // Count possible moves efficiently
-int movements_remaining = ( 8 * 8 ) - 4;
+int movements_remaining = ( ( MAX_LINE_INDEX + 1 )  * ( MAX_COLUMN_INDEX  + 1) ) - 4;
 
 #ifdef DEBUG_MODE
 void show_raw_board() {
     printf("\nRAW BOARD:\n························\n");
-    for ( int i = 0; i < 8; i ++ ) {
-        for ( int j = 0; j < 8; j++ ) {
+    for ( int i = 0; i < MAX_LINE_INDEX + 1; i ++ ) {
+        for ( int j = 0; j < MAX_COLUMN_INDEX + 1; j++ ) {
             if ( board_map[i][j] == ' ' )
                 printf( " - " );
             else
@@ -68,7 +71,7 @@ int check_line( int move_line,
 
     // Check for the right side.
     int j;
-    for ( j = move_column + 1; j < 8; j++ ) {
+    for ( j = move_column + 1; j < MAX_COLUMN_INDEX + 1; j++ ) {
         if ( board_map[move_line][j] == player_cell && !has_adversary_pieces )
             break;
         if ( board_map[move_line][j] == player_cell && has_adversary_pieces ) {
@@ -139,7 +142,7 @@ int check_column( int move_line,
 
     // Check bellow.
     int i;
-    for ( i = move_line + 1; i < 8; i++ ) {
+    for ( i = move_line + 1; i < MAX_LINE_INDEX + 1; i++ ) {
         if ( board_map[i][move_column] == player_cell && !has_adversary_pieces )
             break;
         if ( board_map[i][move_column] == player_cell && has_adversary_pieces ) {
@@ -223,11 +226,11 @@ int make_move( int move_line, int move_column ) {
     if ( board_map[move_line][move_column] != ' ' )
         return ERROR_INVALID_MOVE;
 
-    char player_cell = 'O';
-    char adversary_cell = 'X';
+    char player_cell = PLAYER_O;
+    char adversary_cell = PLAYER_X;
     if ( is_x_turn ) {
-        player_cell = 'X';
-        adversary_cell = 'O';
+        player_cell = PLAYER_X;
+        adversary_cell = PLAYER_O;
     }
 
     // The methods bellow modify the board.
@@ -249,18 +252,18 @@ int make_move( int move_line, int move_column ) {
 char check_winner() {
     int x_count = 0;
     int o_count = 0;
-    for ( int i = 0; i < 8; i++ ) {
-        for ( int j = 0; j < 8; j++ ) {
-            if ( board_map[i][j] == 'X' )
+    for ( int i = 0; i < MAX_LINE_INDEX + 1; i++ ) {
+        for ( int j = 0; j < MAX_COLUMN_INDEX + 1; j++ ) {
+            if ( board_map[i][j] == PLAYER_X )
                 x_count++;
             else
                 o_count++;
         }
     }
     if ( x_count > o_count )
-        return 'X';
+        return PLAYER_X;
     else
-        return 'O';
+        return PLAYER_O;
 }
 
 void start_game_loop() {
