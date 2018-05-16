@@ -25,12 +25,11 @@ char board_map[MAX_LINE_INDEX + 1][MAX_COLUMN_INDEX + 1] = {
     {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
     {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
 };
-
 // Define the initial turn.
 bool is_x_turn = true;
-
 // Count possible moves efficiently
 int movements_remaining = ( ( MAX_LINE_INDEX + 1 )  * ( MAX_COLUMN_INDEX  + 1) ) - 4;
+
 
 #ifdef DEBUG_MODE
 void show_raw_board() {
@@ -48,6 +47,7 @@ void show_raw_board() {
 }
 #endif
 
+
 void get_movement_stdin( int *p_line, int *p_column )
 {
     if ( is_x_turn )
@@ -56,6 +56,7 @@ void get_movement_stdin( int *p_line, int *p_column )
         printf( "Player O: enter your next move: \n" );
     scanf("%d %d", p_line, p_column);
 }
+
 
 int check_line( int move_line,
                 int move_column,
@@ -127,6 +128,7 @@ int check_line( int move_line,
     board_map[move_line][move_column] = player_cell;
     return 0;
 }
+
 
 int check_column( int move_line,
                 int move_column,
@@ -200,6 +202,7 @@ int check_column( int move_line,
     return 0;
 }
 
+
 int check_main_diagonal( int move_line,
                 int move_column,
                 char player_cell,
@@ -258,12 +261,35 @@ int check_main_diagonal( int move_line,
         return ERROR_INVALID_POSITION;
     }
 
-    // TODO: Turn player cells.
+    if ( has_valid_move_right ) {
+#ifdef DEBUG_MODE
+        printf( "\n[ %s ] -> (FINAL INDEXES RIGHT: (%d, %d) -> Player %c\n", __FUNCTION__, final_index_right_i, final_index_right_j, player_cell );
+#endif
+        i = move_line + 1;
+        j = move_column + 1;
+        while ( i <= final_index_right_i ) {
+            board_map[i][j] = player_cell;
+            i++; j++;
+        }
+    }
+
+    if ( has_valid_move_left ) {
+#ifdef DEBUG_MODE
+        printf( "\n[ %s ] -> (FINAL INDEXES LEFT: (%d, %d) -> Player %c\n", __FUNCTION__, final_index_left_i, final_index_left_j, player_cell );
+#endif
+        i = move_line - 1;
+        j = move_column - 1;
+        while ( i >= final_index_left_i ) {
+            board_map[i][j] = player_cell;
+            i--; j--;
+        }
+    }
 
     board_map[move_line][move_column] = player_cell;
 
     return 0;
 }
+
 
 int check_secondary_diagonal( int move_line,
                 int move_column,
@@ -272,6 +298,7 @@ int check_secondary_diagonal( int move_line,
     // TODO: Implement!
     return 0;
 }
+
 
 int make_move( int move_line, int move_column ) {
 #ifdef DEBUG_MODE
@@ -306,6 +333,7 @@ int make_move( int move_line, int move_column ) {
     return 0;
 }
 
+
 char check_winner() {
     int x_count = 0;
     int o_count = 0;
@@ -322,6 +350,7 @@ char check_winner() {
     else
         return PLAYER_O;
 }
+
 
 void start_game_loop() {
     char winner = ' ';
