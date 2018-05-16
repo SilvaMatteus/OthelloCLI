@@ -3,7 +3,9 @@
 #include <string.h>
 
 // These ANSI escape codes clear the entire screen and move the cursor.
+#ifndef DEBUG_MODE
 #define CLEAR_DISPLAY "\033[2J\033[1;1H"
+#endif
 #define SAFE_FREE( ptr ) { if ( ( NULL !=  ptr )  && ( nullptr != ptr ) ) { free( ptr ); ( ptr ) = NULL; } }
 
 typedef struct position_t {
@@ -76,9 +78,14 @@ void display_victory_message() {
 	
 }
 
+void print_invalid_move() {
+	printf( "Invalid move!, try again!" );
+}
 
 void print_display_board() {
+#ifndef DEBUG_MODE
     printf( CLEAR_DISPLAY );
+#endif
 	show_header();
     for ( int i = 0; i < 34; i++ ) {
         for ( int j = 0; j < 53; j++ ) {
