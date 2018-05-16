@@ -204,7 +204,64 @@ int check_main_diagonal( int move_line,
                 int move_column,
                 char player_cell,
                 char adversary_cell ) {
-    // TODO: Implement!
+#ifdef DEBUG_MODE
+    printf( "\n[ %s ] -> (%d, %d) -> Player %c\n", __FUNCTION__, move_line, move_column, player_cell );
+#endif
+    bool has_valid_move_right = false;
+    bool has_adversary_pieces = false;
+    int final_index_right_i = 0;
+    int final_index_right_j = 0;
+
+    int i = move_line + 1;
+    int j = move_column + 1;
+    while ( i < MAX_LINE_INDEX + 1 || j < MAX_COLUMN_INDEX + 1 ) {
+        if ( board_map[i][j] == player_cell && !has_adversary_pieces )
+            break;
+        if ( board_map[i][j] == player_cell && has_adversary_pieces ) {
+            has_valid_move_right = true;
+            final_index_right_i = i - 1;
+            final_index_right_j = j - 1;
+            break;
+        }
+        if ( board_map[i][j] == adversary_cell ) {
+            has_adversary_pieces = true;
+        }
+        i++; j++;
+    }
+
+    bool has_valid_move_left = false;
+    has_adversary_pieces = false;
+    int final_index_left_i = 0;
+    int final_index_left_j = 0;
+
+    i = move_line - 1;
+    j = move_column - 1;
+    while ( i > -1 || j > -1 ) {
+        if ( board_map[i][i] == player_cell && !has_adversary_pieces )
+            break;
+        if ( board_map[i][i] == player_cell && has_adversary_pieces ) {
+            has_valid_move_left = true;
+            final_index_left_i = i + 1;
+            final_index_left_j = j + 1;
+            break;
+        }
+        if ( board_map[i][i] == adversary_cell ) {
+            has_adversary_pieces = true;
+        }
+        i--; j--;
+    }
+
+    if ( !has_valid_move_left && !has_valid_move_right ) {
+#ifdef DEBUG_MODE
+        printf( "\n[ %s ] ->  NO VALID MOVE \n", __FUNCTION__ );
+#endif
+        return ERROR_INVALID_POSITION;
+    }
+
+    // TODO: Turn player cells.
+
+    board_map[move_line][move_column] = player_cell;
+
     return 0;
 }
 
