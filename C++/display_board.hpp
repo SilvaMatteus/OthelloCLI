@@ -8,6 +8,8 @@
 #endif
 #define SAFE_FREE( ptr ) { if ( ( NULL !=  ptr )  && ( nullptr != ptr ) ) { free( ptr ); ( ptr ) = NULL; } }
 
+bool first_print = true;
+
 typedef struct position_t {
 	int line_pos;
 	int column_pos;
@@ -73,20 +75,36 @@ void show_header() {
 	fclose(header);
 }
 
+void display_intructions(){
+	printf("\n");
+	printf("---------------------------OthelloCLI v1.0---------------------------\n");
+	printf("--------------------------------GOAL---------------------------------\n");
+	printf("----------------------------------------------------------------------\n");
+	printf("The goal is to have the	majority of the markers in the board\n");
+	printf("at the end of the game.\n");
+	printf("Each player takes 32 markers and chooses one type (X or O) to\n");
+	printf("use throughout the game. A move consists of outflanking your\n");
+	printf("opponent's markers, then flipping the outflanked marks to your marker.\n");
+	printf("----------------------------------------------------------------------\n");
+}
 
 void display_victory_message( char winner ) {
 	printf( "Congrats player %c!!! You won!!", winner );
 }
 
 void print_invalid_move() {
-	printf( "Invalid move!, try again!\n" );
+	printf( "Invalid move! try again!\n" );
 }
 
 void print_display_board() {
 #ifndef DEBUG_MODE
     printf( CLEAR_DISPLAY );
 #endif
-	show_header();
+	if ( first_print ) {
+		display_intructions();
+	} else {
+		show_header();
+	}
     for ( int i = 0; i < 34; i++ ) {
         for ( int j = 0; j < 53; j++ ) {
             printf( "%c", display_board[i][j] );
@@ -104,15 +122,4 @@ void update_display_board(char board[8][8]) {
 			}
 		}
 	}
-}
-
-void printIntructions(){
-	printf("\n");
-	printf("--------------------------------------------------------------------------------------------------------------------\n");
-	printf("------------------------------------------------Objective of the Game-----------------------------------------------\n");
-	printf("--------------------------------------------------------------------------------------------------------------------\n");
-	printf("The object of the game is to have the	majority of your colour discs on the board at the end of the game\n");
-	printf("Each player takes 32 discs and chooses one colour to use throughout the game.\n");
-	printf("A move consists of outflanking your opponent's disc(s), then flipping the outflanked disc(s) to your colour.\n");
-	printf("---------------------------------------------------------------------------------------------------------------------\n");
 }

@@ -11,6 +11,7 @@
 
 #define PLAYER_X                   'X'
 #define PLAYER_O                   'O'
+#define MOVE_FORMATER "Player %c: enter your next move.\nLINE(0-7) COLUMN(0-7)\n"
 
 #define SAFE_FREE( ptr ) { if ( ( NULL !=  ptr )  && ( nullptr != ptr ) ) { free( ptr ); ( ptr ) = NULL; } }
 
@@ -48,12 +49,15 @@ void show_raw_board() {
 #endif
 
 
-void get_movement_stdin( int *p_line, int *p_column )
+void get_movement_stdin( int *p_line, int *p_column, int prev_movement )
 {
+    if ( prev_movement == ERROR_INVALID_MOVE || prev_movement == ERROR_INVALID_POSITION ) {
+        print_invalid_move();
+    }
     if ( is_x_turn )
-        printf( "Player X: enter your next move: \n" );
+        printf( MOVE_FORMATER, PLAYER_X );
     else
-        printf( "Player O: enter your next move: \n" );
+        printf( MOVE_FORMATER, PLAYER_O );
     scanf("%d %d", p_line, p_column);
 }
 
@@ -357,7 +361,7 @@ int check_secondary_diagonal( int move_line,
         }
         i++; j--;
     }
-    printf("\n>> (%d, %d)\n", final_index_left_i, final_index_left_j);
+
     if ( !has_valid_move_left && !has_valid_move_right ) {
 #ifdef DEBUG_MODE
         printf( "\n[ %s ] ->  NO VALID MOVE \n", __FUNCTION__ );
@@ -449,17 +453,17 @@ char check_winner() {
 
 void start_game_loop() {
     char winner = ' ';
+    int result = 0;
     while ( true ) {
         update_display_board( board_map );
         print_display_board();
 
         // Starts a new turn.
         int move_line, move_column;
-        get_movement_stdin( &move_line, &move_column );
+        get_movement_stdin( &move_line, &move_column, result );
 
-        int result = make_move( move_line, move_column );
+        result = make_move( move_line, move_column );
         if ( result == ERROR_INVALID_MOVE || result == ERROR_INVALID_POSITION ) {
-            print_invalid_move();
             continue;
         }
 #ifdef DEBUG_MODE
@@ -483,6 +487,5 @@ void start_game_loop() {
 
 
 int main() {
-    printIntructions();
     start_game_loop();
 }
