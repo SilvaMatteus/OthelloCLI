@@ -11,6 +11,8 @@ Othello CLI game (https://pt.wikihow.com/Jogar-Othello).
 
 It'll be available in three programming languages.
 
+<img src="https://github.com/SilvaMatteus/OthelloCLI/blob/master/img/screen.png" alt="Game screen. v1.0. C++.">
+
 # C++
 
 To compile:
