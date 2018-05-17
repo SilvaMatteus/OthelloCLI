@@ -480,6 +480,9 @@ void start_game_loop() {
 }
 
 
+
+
 int main() {
+    printIntructions();
     start_game_loop();
 }
