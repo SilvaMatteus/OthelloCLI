@@ -137,57 +137,6 @@ int check_line( int move_line,
     return 0;
 }
 
-bool checkEndGame() {
-    char player = PLAYER_X;
-    char adversary = PLAYER_O;
-    for( int i = 0; i < MAX_LINE_INDEX; i++ ){
-        for( int j = 0; j < MAX_COLUMN_INDEX; j++ ){            
-            if (board_map[i][j] == PLAYER_O && !is_x_turn){
-                player = PLAYER_O;
-                adversary = PLAYER_X ;
-            }
-              
-            else if (board_map[i][j] == PLAYER_X && is_x_turn){
-                player = PLAYER_X;
-                adversary = PLAYER_O;
-            }
-            else // empty spot or current player doesnt own this spot
-                continue;
-            
-            int validationStatus = 0;
-            for( int k = 0; k < MAX_LINE_INDEX; k++ ){
-                for( int l = 0; l < MAX_COLUMN_INDEX; l++ ){
-                    validationStatus += check_column(k, j, player, adversary);
-                    validationStatus += check_line(k, j, player, adversary);
-                    validationStatus += check_main_diagonal(k, j, player, adversary);
-                    validationStatus += check_secondary_diagonal(k, j, player, adversary);
-                } 
-            }
-            if (validationStatus > ERROR_INVALID_POSITION * 4)
-                return false;
-        }
-    }
-    
-    return true;
-}
-
-
-char check_winner() {
-    int x_count = 0;
-    int o_count = 0;
-    for ( int i = 0; i < MAX_LINE_INDEX + 1; i++ ) {
-        for ( int j = 0; j < MAX_COLUMN_INDEX + 1; j++ ) {
-            if ( board_map[i][j] == PLAYER_X )
-                x_count++;
-            else
-                o_count++;
-        }
-    }
-    if ( x_count > o_count )
-        return PLAYER_X;
-    else
-        return PLAYER_O;
-}
 
 int check_column( int move_line,
                 int move_column,
@@ -521,7 +470,7 @@ void start_game_loop() {
         show_raw_board();
 #endif
         // If there is no move, count the cells to announce the winner.
-        if ( movements_remaining == NO_MOVEMENT_REMAINING || checkEndGame()) {
+        if ( movements_remaining == NO_MOVEMENT_REMAINING ) {
             winner = check_winner();
             break;
         }
