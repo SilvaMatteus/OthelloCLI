@@ -102,6 +102,7 @@ void print_display_board() {
 #endif
 	if ( first_print ) {
 		display_intructions();
+		first_print = false;
 	} else {
 		show_header();
 	}
