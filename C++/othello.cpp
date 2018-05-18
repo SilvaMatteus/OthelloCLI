@@ -432,9 +432,9 @@ int make_move( int move_line, int move_column ) {
     return 0;
 }
 
-bool checkEndGame() {
-    char player = PLAYER_X;
-    char adversary = PLAYER_O;
+/*bool checkEndGame() {
+/    char player = PLAYER_X;
+#    char adversary = PLAYER_O;
     for( int i = 0; i < MAX_LINE_INDEX; i++ ){
         for( int j = 0; j < MAX_COLUMN_INDEX; j++ ){
             if (board_map[i][j] == PLAYER_O && !is_x_turn){
@@ -464,7 +464,7 @@ bool checkEndGame() {
     }
 
     return true;
-}
+}*/
 
 char check_winner() {
     int x_count = 0;
@@ -503,7 +503,7 @@ void start_game_loop() {
         show_raw_board();
 #endif
         // If there is no move, count the cells to announce the winner.
-        if ( movements_remaining == NO_MOVEMENT_REMAINING || checkEndGame()) {
+        if ( movements_remaining == NO_MOVEMENT_REMAINING ) {
             winner = check_winner();
             break;
         }
