@@ -436,19 +436,19 @@ bool checkEndGame() {
     char player = PLAYER_X;
     char adversary = PLAYER_O;
     for( int i = 0; i < MAX_LINE_INDEX; i++ ){
-        for( int j = 0; j < MAX_COLUMN_INDEX; j++ ){            
+        for( int j = 0; j < MAX_COLUMN_INDEX; j++ ){
             if (board_map[i][j] == PLAYER_O && !is_x_turn){
                 player = PLAYER_O;
                 adversary = PLAYER_X ;
             }
-              
+
             else if (board_map[i][j] == PLAYER_X && is_x_turn){
                 player = PLAYER_X;
                 adversary = PLAYER_O;
             }
             else // empty spot or current player doesnt own this spot
                 continue;
-            
+
             int validationStatus = 0;
             for( int k = 0; k < MAX_LINE_INDEX; k++ ){
                 for( int l = 0; l < MAX_COLUMN_INDEX; l++ ){
@@ -456,13 +456,13 @@ bool checkEndGame() {
                     validationStatus += check_line(k, j, player, adversary);
                     validationStatus += check_main_diagonal(k, j, player, adversary);
                     validationStatus += check_secondary_diagonal(k, j, player, adversary);
-                } 
+                }
             }
             if (validationStatus > ERROR_INVALID_POSITION * 4)
                 return false;
         }
     }
-    
+
     return true;
 }
 
@@ -516,9 +516,69 @@ void start_game_loop() {
     display_victory_message( winner );
 }
 
+void start_game_loopCPU(){
+  char winner = ' ';
+  int result = 0;
+  while ( true ) {
+      update_display_board( board_map );
+      print_display_board();
 
+      int move_line, move_column;
+
+      if(is_x_turn == false){
+        for(int i = 0; i < 8; i++){
+          for(int j = 0; j < 8; j++){
+            int line = i;
+            int column = j;
+            result = make_move( line, column );
+            if(result == 0){
+              break;
+            }
+          }
+          if(result == 0){
+              break;
+          }
+        }
+
+      }else{
+        get_movement_stdin( &move_line, &move_column, result);
+        int result = make_move( move_line, move_column );
+        if ( result == ERROR_INVALID_MOVE || result == ERROR_INVALID_POSITION ) {
+            print_invalid_move();
+            continue;
+        }
+      }
+
+#ifdef DEBUG_MODE
+  show_raw_board();
+#endif
+
+      // If there is no move, count the cells to announce the winner.
+      if ( movements_remaining == NO_MOVEMENT_REMAINING ) {
+          winner = check_winner();
+          break;
+      }
+      is_x_turn = !is_x_turn; // Change the current player.
+
+#ifdef DEBUG_MODE
+      printf("\n>> Movement: [ %d, %d ].\n", move_line, move_column);
+#endif
+    }
+    display_victory_message( winner );
+
+}
 
 
 int main() {
+  int option;
+  printf("Select game mode\n");
+  printf("1 - Player VS Player\n");
+  printf("2 - Player VS CPU\n");
+  scanf("%d: ", &option);
+  printf("\n");
+  if(option == 1){
     start_game_loop();
+  }else{
+    start_game_loopCPU();
+  }
 }
