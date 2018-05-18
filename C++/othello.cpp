@@ -534,9 +534,60 @@ void start_game_loop() {
     display_victory_message( winner );
 }
 
+void start_game_loopCPU(){
+  char winner = ' ';
+  int result = 0;
+  while ( true ) {
+      update_display_board( board_map );
+      print_display_board();
 
+      int move_line, move_column;
 
+      if(is_x_turn == false){
+        for(int i = 0; i < 8; i++){
+          for(int j = 0; j < 8; j++){
+            int line = i;
+            int column = j;
+            result = make_move( line, column );
+            if(result == 0){
+              break;
+            }
+          }
+          if(result == 0){
+              break;
+          }
+        }
 
-int main() {
-    start_game_loop();
+      }else{
+        get_movement_stdin( &move_line, &move_column, result);
+        int result = make_move( move_line, move_column );
+        if ( result == ERROR_INVALID_MOVE || result == ERROR_INVALID_POSITION ) {
+            print_invalid_move();
+            continue;
+        }
+      }
+
+#ifdef DEBUG_MODE
+  show_raw_board();
+#endif
+
+      // If there is no move, count the cells to announce the winner.
+      if ( movements_remaining == NO_MOVEMENT_REMAINING ) {
+          winner = check_winner();
+          break;
+      }
+      is_x_turn = !is_x_turn; // Change the current player.
+
+#ifdef DEBUG_MODE
+      printf("\n>> Movement: [ %d, %d ].\n", move_line, move_column);
+#endif
+    }
+    display_victory_message( winner );
+
+}
+
+int main(){
+    //start_game_loop();
+    start_game_loopCPU();
+
 }
