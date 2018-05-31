@@ -1,8 +1,8 @@
-      ____  _   _          _ _          _____ _      _____ 
+      ____  _   _          _ _          _____ _      _____
      / __ \| | | |        | | |        / ____| |    |_   _|
     | |  | | |_| |__   ___| | | ___   | |    | |      | |  
     | |  | | __| '_ \ / _ \ | |/ _ \  | |    | |      | |  
-    | |__| | |_| | | |  __/ | | (_) | | |____| |____ _| |_ 
+    | |__| | |_| | | |  __/ | | (_) | | |____| |____ _| |_
      \____/ \__|_| |_|\___|_|_|\___/   \_____|______|_____|   
     Othello CLI                                          
 
@@ -28,8 +28,18 @@ To remove binary files:
 
 `make clean`
 
+# Haskell
+
+to compile
+
+`ghc othello.hs`
+
+to import
+
+`:l othello.hs`
+
 # RoadMap
 
 - C++ (Work in progress)
-- Prolog (Future work)
 - Haskell (Future work)
+- Prolog (Future work)

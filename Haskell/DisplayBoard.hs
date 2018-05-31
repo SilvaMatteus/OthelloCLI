@@ -35,6 +35,16 @@ display_board = [[' ', ' ', ' ', ' ', ' ', ' ', ' ', '0', ' ', ' ', ' ', ' ', ' 
       [' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ', '#'],
       [' ', ' ', ' ', ' ', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#']]
 
+transformation_matrix = [
+ [(3, 7), (3, 13), (3, 19), (3, 25), (3, 31), (3, 37), (3, 43), (3, 49)],
+ [(7, 7 ), (7, 13), (7, 19), (7, 25), (7, 31), (7, 37), (7, 43), (7, 49)],
+ [(11, 7), (11, 13), (11, 19), (11, 25), (11, 31), (11, 37), (11, 43), (11, 49)],
+ [(15, 7), (15, 13), (15, 19), (15, 25), (15, 31), (15, 37), (15, 43), (15, 49)],
+ [(19, 7), (19, 13), (19, 19), (19, 25), (19, 31), (19, 37), (19, 43), (19, 49)],
+ [(23, 7), (23, 13), (23, 19), (23, 25), (23, 31), (23, 37), (23, 43), (23, 49)],
+ [(27, 7), (27, 13), (27, 19), (27, 25), (27, 31), (27, 37), (27, 43), (27, 49) ],
+ [(31, 7), (31, 13), (31, 19), (31, 25), (31, 31), (31, 37 ), (31, 43), (31, 49)]]
+
 
 
 print_invalid_move :: IO ()
@@ -68,3 +78,26 @@ print_display_board' (x:xs) = concatenateChars x ++ "\n" ++ print_display_board'
 concatenateChars :: [Char] -> String
 concatenateChars [] = ""
 concatenateChars (x:xs) = [x] ++ concatenateChars xs
+
+
+update_display_board [] line = []
+update_display_board (x:xs) line = (verifyColum x line 0) : update_display_board xs (line+1)
+
+verifyColum [] line colum = []
+verifyColum (x:xs) line colum | x /= ' ' = matrixReplace display_board (fst pair) (snd pair) x
+                              | otherwise = verifyColum xs line (colum + 1) where
+                                pair = transformationPair transformation_matrix line colum
+
+transformationPair transformation_matrix line colum = (transformation_matrix !! line) !! colum
+
+matrixReplace (x:xs) line colum element = matrixReplace' (x:xs) incialLine line colum element where
+ incialLine = 0
+
+matrixReplace' [] atualLine line colum element = []
+matrixReplace' (x:xs) atualLine line colum element | atualLine == line = (replaceNth colum element x) : restOfList
+                                                   | otherwise =  x:restOfList where
+                                                      restOfList = matrixReplace' xs (atualLine+1) line colum element
+
+replaceNth n newVal (x:xs)
+     | n == 0 = newVal:xs
+     | otherwise = x:replaceNth (n-1) newVal xs
