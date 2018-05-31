@@ -1,25 +1,29 @@
-import qualified displayBoard as display
+import qualified DisplayBoard as D
 
-MAX_LINE_INDEX = 7
+max_LINE_INDEX = 7
 
-MAX_COLUMN_INDEX = 7
+max_COLUMN_INDEX = 7
 
-ERROR_INVALID_POSITION = -1
+error_INVALID_POSITION = -1
 
-NO_MOVEMENT_REMAINING = 0
+no_MOVEMENT_REMAINING = 0
 
-ERROR_INVALID_MOVE = -4
+error_INVALID_MOVE = -4
 
-PLAYER_X = 'X'
+player_X = 'X'
+player_O = 'O'
 
-board_map = [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+board_map = [[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
             [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
             [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
             [' ', ' ', ' ', 'X', 'O', ' ', ' ', ' '],
             [' ', ' ', ' ', 'O', 'X', ' ', ' ', ' '],
             [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
             [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
+            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']]
 
 
-movements_remaining = ( ( MAX_LINE_INDEX + 1 )  * ( MAX_COLUMN_INDEX  + 1) ) - 4
+movements_remaining = ( ( max_LINE_INDEX + 1 ) * ( max_COLUMN_INDEX  + 1) ) - 4
+
+main :: IO ()
+main = return ()
