@@ -26,3 +26,5 @@ generateAllPositions = [(x, y) | x <- [0..7], y <- [0..7]]
 
 -- generate empty board
 emptyBoard = Data.Map.fromList (zip generateAllPositions (repeat Empty))
+
+main = return ()
