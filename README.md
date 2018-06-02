@@ -30,6 +30,13 @@ To remove binary files:
 
 # Haskell
 
+install `cgi-3001.3.0.2` library
+
+
+`cabal install cgi-3001.3.0.2`
+
+or `cabal install --force-reinstalls cgi-3001.3.0.2`
+
 to compile
 
 `ghc othello.hs`
@@ -37,6 +44,10 @@ to compile
 to import
 
 `:l othello.hs`
+
+To remove binary files:
+
+`clear.sh`
 
 # RoadMap
 
