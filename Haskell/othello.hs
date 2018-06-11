@@ -33,12 +33,65 @@ sumPosition (positionX1, positionY1) (positionX2, positiony2) = (positionX1 + po
 
 -- verify possible moves using lambda expression and foldr
 possibleMoves color board = foldr
-	(\position possiblePositions -> if isLegalMove color board position then position : possiblePositions else possiblePositions)
-	[]
-	generateAllPositions
+    (\position possiblePositions -> if isValidMove color board position then position : possiblePositions else possiblePositions)
+    []
+    generateAllPositions
 
 -- verify if a movement is valid
 isValidMove :: Piece -> Board -> Position -> Bool
-isValidMove color board position = (changedPiecesOfMove color board position) /= []
+isValidMove color board position = (piecesChangedInMove color board position) /= []
+
+-- return list of position of pieces that changed in a move
+piecesChangedInMove :: Piece -> Board -> Position -> [Position]
+piecesChangedInMove color board position =
+    if flipped /= []
+        then position : flipped
+        else []
+    where flipped = concat (map (piecesChangedInRow color board position) moveDirections)
+
+-- verify if is possible to move in a row
+verifyRow :: Piece -> Board -> Position -> Position -> Bool
+verifyRow color board position direction = verifyRow' True color board position direction
+
+verifyRow' firstLevel color board position direction =
+                if nextColor == adversaryPiece color then
+                    verifyRow' False color board nextPosition direction
+                else
+                    nextColor == color && not firstLevel
+                where
+                    nextPosition = sumPosition position direction
+                    nextColor = fromMaybe Empty (Data.Map.lookup nextPosition board)
+
+-- return list of piece that changed in a row
+piecesChangedInRow :: Piece -> Board -> Position -> Position -> [Position]
+piecesChangedInRow color board position direction = piecesChangedInRow' True color board position direction
+    where
+        piecesChangedInRow' firstLevel color board position direction =
+            if nextColor == adversaryPiece color then
+                if restOfRow /= []
+                    then if not firstLevel
+                        then position : restOfRow
+                        else restOfRow
+                else []
+          else if nextColor == color then
+                if not firstLevel
+                    then [position]
+                    else []
+            else
+              []
+                where
+                    nextPosition = sumPosition position direction
+                    nextColor = fromMaybe Empty (Data.Map.lookup nextPosition board)
+                    restOfRow = piecesChangedInRow' False color board nextPosition direction
+
+calculatePiecesAdvantage :: Piece -> Board -> Int
+calculatePiecesAdvantage color board = sum (map
+    (\((_, _), x) ->
+        if x == color
+            then 1
+            else if x == adversaryPiece color
+                then -1
+                else 0)
+    (Data.Map.toList board))
 
 main = return ()
