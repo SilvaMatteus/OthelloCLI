@@ -65,25 +65,31 @@ verifyRow' firstLevel color board position direction =
 -- return list of piece that changed in a row
 piecesChangedInRow :: Piece -> Board -> Position -> Position -> [Position]
 piecesChangedInRow color board position direction = piecesChangedInRow' True color board position direction
-    where
-        piecesChangedInRow' firstLevel color board position direction =
-            if nextColor == adversaryPiece color then
-                if restOfRow /= []
-                    then if not firstLevel
-                        then position : restOfRow
-                        else restOfRow
-                else []
-          else if nextColor == color then
-                if not firstLevel
-                    then [position]
-                    else []
-            else
-              []
-                where
-                    nextPosition = sumPosition position direction
-                    nextColor = fromMaybe Empty (Data.Map.lookup nextPosition board)
-                    restOfRow = piecesChangedInRow' False color board nextPosition direction
+  where
+    piecesChangedInRow' firstLevel color board position direction =
+      if nextColor == adversaryPiece color then
+        if restOfRow /= []
+          then if not firstLevel
+            then position : restOfRow
+            else restOfRow
+          else []
+      else if nextColor == color then
+        if not firstLevel
+          then [position]
+      else []
+        else
+          []
+      where
+        nextPosition = sumPosition position direction
+        nextColor = fromMaybe Empty (Data.Map.lookup nextPosition board)
+        restOfRow = piecesChangedInRow' False color board nextPosition direction
 
+-- calculate number of options avaliable for one move
+calculateOptionsAdvantage :: Piece -> Board -> Int
+calculateOptionsAdvantage color board = numOptions color board - numOptions (adversaryPiece color) board
+  where numOptions color board = sum (map (\position -> if isValidMove color board position then 1 else 0) generateAllPositions)
+
+-- calculate the number of pieces in advantage no generate
 calculatePiecesAdvantage :: Piece -> Board -> Int
 calculatePiecesAdvantage color board = sum (map
     (\((_, _), x) ->
@@ -93,5 +99,20 @@ calculatePiecesAdvantage color board = sum (map
                 then -1
                 else 0)
     (Data.Map.toList board))
+
+-- in all possibile possition and advantages find the best move
+findBestMove :: (Piece -> Board -> Int) -> Piece -> Board -> Position
+findBestMove advantageFunction color board =
+  (\(x, _) -> x)
+    (maximumBy
+      (\(_, x) (_, y) -> compare x y)
+        (map
+        (\position -> (position, advantageFunction color (makeMove color board position)))
+        generateAllPositions))
+
+-- make a move in the board
+makeMove :: Piece -> Board -> Position -> Board
+makeMove color board position = Data.Map.union (Data.Map.fromList
+ (zip (piecesChangedInMove color board position) (repeat color))) board
 
 main = return ()
