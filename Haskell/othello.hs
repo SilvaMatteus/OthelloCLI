@@ -110,9 +110,44 @@ findBestMove advantageFunction color board =
         (\position -> (position, advantageFunction color (makeMove color board position)))
         generateAllPositions))
 
+-- mensures advantage bases on board state
+mensuresAdvantage :: Piece -> Board -> Int
+mensuresAdvantage color board = calculatePiecesAdvantage color board + 10 * calculateOptionsAdvantage color board
+
 -- make a move in the board
 makeMove :: Piece -> Board -> Position -> Board
 makeMove color board position = Data.Map.union (Data.Map.fromList
  (zip (piecesChangedInMove color board position) (repeat color))) board
+
+advantageCalculator :: Int -> Piece -> Board -> Int
+advantageCalculator depth color board =
+ let
+     allValidOpponentMoves = possibleMoves (adversaryPiece color) board
+     allValidProponentMoves = possibleMoves color board
+     gameOver = allValidProponentMoves == [] && allValidOpponentMoves == []
+     in if gameOver
+         then
+             -- exit condition for game over
+             if calculatePiecesAdvantage color board > 0
+                 then 1000000
+                 else -1000000
+         else
+             if depth <= 0
+                 then
+                     -- end of recursion
+                  mensuresAdvantage color board
+                 else
+                     -- calculate opponent move
+                     let
+                         nextColor = if allValidOpponentMoves /= [] then adversaryPiece color else color
+                         validMovesForNextColor = if nextColor /= color then allValidOpponentMoves else allValidProponentMoves
+                         maxAdvantageForNextColor =
+                             maximum (map
+                                 (\position -> advantageCalculator (depth-1) nextColor (makeMove nextColor board position))
+                                 validMovesForNextColor)
+                     in if nextColor /= color
+                         then - maxAdvantageForNextColor
+                         else   maxAdvantageForNextColor
+
 
 main = return ()
