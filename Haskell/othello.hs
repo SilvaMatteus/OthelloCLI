@@ -3,6 +3,19 @@ import qualified Data.Map
 import Data.Maybe
 import Data.List
 
+display_instructions :: IO ()
+display_instructions = putStrLn instructions where
+    instructions = "\n" ++ line1 ++ line2 ++ line3 ++ line4 ++ line5 ++ line6 ++ line7 ++ line8 ++ line9
+    line1 = "---------------------------OthelloCLI v1.0---------------------------\n"
+    line2 = "--------------------------------GOAL---------------------------------\n"
+    line3 = "----------------------------------------------------------------------\n"
+    line4 = "The goal is to have the majority of the markers\n"
+    line5 = "in the board at the end of the game.\n"
+    line6 = "Each player takes 32 markers and chooses one type (X or O) to\n"
+    line7 = "use throughout the game. A move consists of outflanking your\n"
+    line8 = "opponent's markers, then flipping the outflanked marks to your marker.\n"
+    line9 = "----------------------------------------------------------------------\n"
+
 
 -- mapping each piece to a position
 data Piece = White | Black | Empty deriving (Eq, Show)
@@ -148,6 +161,29 @@ advantageCalculator depth color board =
                      in if nextColor /= color
                          then - maxAdvantageForNextColor
                          else   maxAdvantageForNextColor
+
+colorToPiece :: Piece -> String
+colorToPiece color = case color of
+  Empty -> " "
+  White -> "O"
+  Black -> "X"
+
+printBoard :: Board -> String
+printBoard board =
+  "\n  0 1 2 3 4 5 6 7 \n _________________\n" ++
+  (intercalate
+   "\n _________________\n"
+   (map
+      (printRow board)
+      [0..7])) ++
+   "\n _________________\n  0 1 2 3 4 5 6 7 \n"
+
+printRow :: Board -> Int -> String
+printRow board row = show row ++ "|" ++
+  (intercalate "|" (map
+    (\position -> colorToPiece (fromMaybe Empty (Data.Map.lookup position board)))
+    ([(x, row) | x <- [0..7]]))) ++
+  "|" ++ show row
 
 
 main = return ()
