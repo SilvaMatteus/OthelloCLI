@@ -5,9 +5,9 @@ import Data.List
 
 display_instructions :: IO ()
 display_instructions = putStrLn instructions where
-    instructions = "\n" ++ line1 ++ line2 ++ line3 ++ line4 ++ line5 ++ line6 ++ line7 ++ line8 ++ line9
-    line1 = "---------------------------OthelloCLI v1.0---------------------------\n"
-    line2 = "--------------------------------GOAL---------------------------------\n"
+    instructions = "\n" ++ line1 ++ line2 ++ line3 ++ line4 ++ line5 ++ line6 ++ line7 ++ line8 ++ line9 ++ line10
+    line1 = "---------------------------OthelloCLI v1.0----------------------------\n"
+    line2 = "--------------------------------GOAL----------------------------------\n"
     line3 = "----------------------------------------------------------------------\n"
     line4 = "The goal is to have the majority of the markers\n"
     line5 = "in the board at the end of the game.\n"
@@ -15,7 +15,7 @@ display_instructions = putStrLn instructions where
     line7 = "use throughout the game. A move consists of outflanking your\n"
     line8 = "opponent's markers, then flipping the outflanked marks to your marker.\n"
     line9 = "----------------------------------------------------------------------\n"
-
+    line10 = "Enter you move in format (colum, line), Exemple (3, 4) - colum 3, line 4\n"
 
 -- mapping each piece to a position
 data Piece = White | Black | Empty deriving (Eq, Show)
@@ -185,5 +185,56 @@ printRow board row = show row ++ "|" ++
     ([(x, row) | x <- [0..7]]))) ++
   "|" ++ show row
 
+clearAction = putStr "\ESC[2J"
 
-main = return ()
+playerMove color board = do
+    -- Verify that none of players can make a move
+    let gameOver = possibleMoves color board == [] && possibleMoves (adversaryPiece color) board == []
+    if gameOver
+        then
+            do
+                putStr "Game Over\n"
+                -- print the winner
+
+                if calculatePiecesAdvantage color board == 0
+                    then
+                        putStr "Tie"
+                    else
+                        if calculatePiecesAdvantage color board > 0
+                            then putStr ((colorToPiece color) ++ " won !!!!")
+                            else putStr ((colorToPiece (adversaryPiece color)) ++ " won !!!!")
+        else
+            do
+                putStr (printBoard board)
+                if color == White
+                    then
+                        -- get move from player
+                        do
+                            putStr "\n"
+                            putStr "Enter your move : \n"
+                            line <- getLine
+                            let
+                                maybePosition = maybeRead line
+                            if isNothing maybePosition || not (isValidMove color board (fromJust maybePosition))
+                                then
+                                    -- if the move is not valid
+                                    do
+                                        putStr "Illegal move, Try Again.\n"
+                                        playerMove color board
+                                else
+                                    actuallyMove (fromJust maybePosition)
+                    else
+                        actuallyMove (findBestMove (advantageCalculator 4) color board)
+                        -- CPU move
+                        where
+                            actuallyMove position =
+                                -- Make the move
+                                do
+                                    let
+                                        resultingBoard = makeMove color board position
+                                        nextColor = if possibleMoves (adversaryPiece color) resultingBoard /= [] then adversaryPiece color else color
+                                    playerMove nextColor resultingBoard
+
+
+main = do display_instructions
+          playerMove White generateInitialBoard
