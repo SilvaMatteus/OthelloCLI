@@ -224,7 +224,21 @@ playerMove color board = do
                                 else
                                     actuallyMove (fromJust maybePosition)
                     else
-                        actuallyMove (findBestMove (advantageCalculator 4) color board)
+                        -- actuallyMove (findBestMove (advantageCalculator 4) color board)
+                        do
+                            putStr "\n"
+                            putStr "Enter your move : \n"
+                            line <- getLine
+                            let
+                                maybePosition = maybeRead line
+                            if isNothing maybePosition || not (isValidMove color board (fromJust maybePosition))
+                                then
+                                    -- if the move is not valid
+                                    do
+                                        putStr "Illegal move, Try Again.\n"
+                                        playerMove color board
+                                else
+                                    actuallyMove (fromJust maybePosition)
                         -- CPU move
                         where
                             actuallyMove position =
