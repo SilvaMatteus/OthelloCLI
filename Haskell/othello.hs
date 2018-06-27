@@ -185,9 +185,8 @@ printRow board row = show row ++ "|" ++
     ([(x, row) | x <- [0..7]]))) ++
   "|" ++ show row
 
-clearAction = putStr "\ESC[2J"
 
-playerMove color board = do
+playerVsCPUMove color board = do
     -- Verify that none of players can make a move
     let gameOver = possibleMoves color board == [] && possibleMoves (adversaryPiece color) board == []
     if gameOver
@@ -211,7 +210,7 @@ playerMove color board = do
                         -- get move from player
                         do
                             putStr "\n"
-                            putStr "Enter your move : \n"
+                            putStr " Player O Enter your move (column, line): \n"
                             line <- getLine
                             let
                                 maybePosition = maybeRead line
@@ -220,25 +219,11 @@ playerMove color board = do
                                     -- if the move is not valid
                                     do
                                         putStr "Illegal move, Try Again.\n"
-                                        playerMove color board
+                                        playerVsCPUMove color board
                                 else
                                     actuallyMove (fromJust maybePosition)
                     else
-                        -- actuallyMove (findBestMove (advantageCalculator 4) color board)
-                        do
-                            putStr "\n"
-                            putStr "Enter your move : \n"
-                            line <- getLine
-                            let
-                                maybePosition = maybeRead line
-                            if isNothing maybePosition || not (isValidMove color board (fromJust maybePosition))
-                                then
-                                    -- if the move is not valid
-                                    do
-                                        putStr "Illegal move, Try Again.\n"
-                                        playerMove color board
-                                else
-                                    actuallyMove (fromJust maybePosition)
+                        actuallyMove (findBestMove (advantageCalculator 4) color board)
                         -- CPU move
                         where
                             actuallyMove position =
@@ -247,8 +232,81 @@ playerMove color board = do
                                     let
                                         resultingBoard = makeMove color board position
                                         nextColor = if possibleMoves (adversaryPiece color) resultingBoard /= [] then adversaryPiece color else color
-                                    playerMove nextColor resultingBoard
+                                    playerVsCPUMove nextColor resultingBoard
+
+
+
+playerVsPlayerMove color board = do
+    -- Verify that none of players can make a move
+    let gameOver = possibleMoves color board == [] && possibleMoves (adversaryPiece color) board == []
+    if gameOver
+        then
+            do
+                putStr "Game Over\n"
+                -- print the winner
+
+                if calculatePiecesAdvantage color board == 0
+                    then
+                        putStr "Tie"
+                    else
+                        if calculatePiecesAdvantage color board > 0
+                            then putStr ((colorToPiece color) ++ " won !!!!")
+                            else putStr ((colorToPiece (adversaryPiece color)) ++ " won !!!!")
+        else
+            do
+                putStr (printBoard board)
+                if color == White
+                    then
+                        -- get move from player )
+                        do
+                            putStr "\n"
+                            putStr "Player O Enter your move (column, line): \n"
+                            line <- getLine
+                            let
+                                maybePosition = maybeRead line
+                            if isNothing maybePosition || not (isValidMove color board (fromJust maybePosition))
+                                then
+                                    -- if the move is not valid
+                                    do
+                                        putStr "Illegal move, Try Again.\n"
+                                        playerVsPlayerMove color board
+                                        -- player O move
+                                else
+                                    actuallyMove (fromJust maybePosition)
+                    else
+                        do
+                            putStr "\n"
+                            putStr "Player X Enter your move (column, line): \n"
+                            line <- getLine
+                            let
+                                maybePosition = maybeRead line
+                            if isNothing maybePosition || not (isValidMove color board (fromJust maybePosition))
+                                then
+                                    -- if the move is not valid
+                                    do
+                                        putStr "Illegal move, Try Again.\n"
+                                        playerVsPlayerMove color board
+                                        -- Player X move
+                                else
+                                    actuallyMove (fromJust maybePosition)
+                        where
+                            actuallyMove position =
+                                -- Make the move
+                                do
+                                    let
+                                        resultingBoard = makeMove color board position
+                                        nextColor = if possibleMoves (adversaryPiece color) resultingBoard /= [] then adversaryPiece color else color
+                                    playerVsPlayerMove nextColor resultingBoard
+
+
+
 
 
 main = do display_instructions
-          playerMove White generateInitialBoard
+          putStrLn "\n"
+          putStrLn "1- Player vs Player"
+          putStrLn "2- Player vs CPU"
+          putStrLn "\n"
+          putStrLn "Select your Option :"
+          option <- getLine
+          if option == "1" then playerVsPlayerMove White generateInitialBoard else playerVsCPUMove White generateInitialBoard
