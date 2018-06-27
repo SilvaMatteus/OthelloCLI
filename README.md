@@ -51,6 +51,6 @@ To remove binary files:
 
 # RoadMap
 
-- C++ (Work in progress)
-- Haskell (Future work)
+- C++ (Done)
+- Haskell (Done)
 - Prolog (Future work)
