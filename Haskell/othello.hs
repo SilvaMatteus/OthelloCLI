@@ -5,7 +5,7 @@ import Data.List
 
 display_instructions :: IO ()
 display_instructions = putStrLn instructions where
-    instructions = "\n" ++ line1 ++ line2 ++ line3 ++ line4 ++ line5 ++ line6 ++ line7 ++ line8 ++ line9 ++ line10
+    instructions = "\n" ++ line1 ++ line2 ++ line3 ++ line4 ++ line5 ++ line6 ++ line7 ++ line8 ++ line9 ++ lineInstructions ++ line9
     line1 = "---------------------------OthelloCLI v1.0----------------------------\n"
     line2 = "--------------------------------GOAL----------------------------------\n"
     line3 = "----------------------------------------------------------------------\n"
@@ -15,7 +15,9 @@ display_instructions = putStrLn instructions where
     line7 = "use throughout the game. A move consists of outflanking your\n"
     line8 = "opponent's markers, then flipping the outflanked marks to your marker.\n"
     line9 = "----------------------------------------------------------------------\n"
-    line10 = "Enter you move in format (colum, line), Exemple (3, 4) - colum 3, line 4\n"
+    --line10 = "Enter you move in format:\nline\ncolumn\n\nExample\n 4\n 3\nColumn 3, line 4\n"
+
+lineInstructions = "Enter you move in format:\nline\ncolumn\n\nExample (line 4, column 3):\n 4\n 3\n"
 
 -- mapping each piece to a position
 data Piece = White | Black | Empty deriving (Eq, Show)
@@ -172,7 +174,7 @@ printBoard :: Board -> String
 printBoard board =
   "\n  0 1 2 3 4 5 6 7 \n _________________\n" ++
   (intercalate
-   "\n _________________\n"
+   "\n -----------------\n"
    (map
       (printRow board)
       [0..7])) ++
@@ -210,15 +212,20 @@ playerVsCPUMove color board = do
                         -- get move from player
                         do
                             putStr "\n"
-                            putStr " Player O Enter your move (column, line): \n"
-                            line <- getLine
+                            putStr " Player O Enter your move (line, column): \n"
+                            --line <- getLine
+                            x <- getLine
+                            y <- getLine
+                            let line = "("++ y ++ "," ++ x ++ ")"
                             let
                                 maybePosition = maybeRead line
                             if isNothing maybePosition || not (isValidMove color board (fromJust maybePosition))
                                 then
                                     -- if the move is not valid
                                     do
-                                        putStr "Illegal move, Try Again.\n"
+                                        --putStr "Illegal move, Try Again. Enter you move in format: \nline\ncolumn\n\nExample\n4\n3\nColumn 3, line 4\n"
+                                        putStr "Illegal move, Try Again."
+                                        putStr lineInstructions
                                         playerVsCPUMove color board
                                 else
                                     actuallyMove (fromJust maybePosition)
@@ -260,15 +267,20 @@ playerVsPlayerMove color board = do
                         -- get move from player )
                         do
                             putStr "\n"
-                            putStr "Player O Enter your move (column, line): \n"
-                            line <- getLine
+                            putStr "Player O Enter your move (line, column): \n"
+                            --line <- getLine
+                            x <- getLine
+                            y <- getLine
+                            let line = "("++ y ++ "," ++ x ++ ")"
                             let
                                 maybePosition = maybeRead line
                             if isNothing maybePosition || not (isValidMove color board (fromJust maybePosition))
                                 then
                                     -- if the move is not valid
                                     do
-                                        putStr "Illegal move, Try Again.\n"
+                                        --putStr "Illegal move, Try Again.\nEnter you move in format (colum, line), Example (3, 4)\n"
+                                        putStr "Illegal move, Try Again."
+                                        putStr lineInstructions
                                         playerVsPlayerMove color board
                                         -- player O move
                                 else
@@ -276,15 +288,20 @@ playerVsPlayerMove color board = do
                     else
                         do
                             putStr "\n"
-                            putStr "Player X Enter your move (column, line): \n"
-                            line <- getLine
+                            putStr "Player X Enter your move (line, column): \n"
+                            --line <- getLine
+                            x <- getLine
+                            y <- getLine
+                            let line = "("++ y ++ "," ++ x ++ ")"
                             let
                                 maybePosition = maybeRead line
                             if isNothing maybePosition || not (isValidMove color board (fromJust maybePosition))
                                 then
                                     -- if the move is not valid
                                     do
-                                        putStr "Illegal move, Try Again.\n"
+                                        --putStr "Illegal move, Try Again.\nEnter you move in format (colum, line), Example (3, 4)\n"
+                                        putStr "Illegal move, Try Again."
+                                        putStr lineInstructions
                                         playerVsPlayerMove color board
                                         -- Player X move
                                 else
@@ -303,7 +320,7 @@ playerVsPlayerMove color board = do
 
 
 main = do display_instructions
-          putStrLn "\n"
+          putStrLn ""
           putStrLn "1- Player vs Player"
           putStrLn "2- Player vs CPU"
           putStrLn "\n"
