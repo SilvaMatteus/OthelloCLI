@@ -17,7 +17,7 @@ display_instructions = putStrLn instructions where
     line9 = "----------------------------------------------------------------------\n"
     --line10 = "Enter you move in format:\nline\ncolumn\n\nExample\n 4\n 3\nColumn 3, line 4\n"
 
-lineInstructions = "Enter you move in format:\nline\ncolumn\n\nExample (line 4, column 3):\n 4\n 3\n"
+lineInstructions = "Enter your move in format: line column\nExample (line 4, column 3): 4 3\n"
 
 -- mapping each piece to a position
 data Piece = White | Black | Empty deriving (Eq, Show)
@@ -213,10 +213,8 @@ playerVsCPUMove color board = do
                         do
                             putStr "\n"
                             putStr " Player O Enter your move (line, column): \n"
-                            --line <- getLine
-                            x <- getLine
-                            y <- getLine
-                            let line = "("++ y ++ "," ++ x ++ ")"
+                            xy <- getLine
+                            let line = getCoordinates xy
                             let
                                 maybePosition = maybeRead line
                             if isNothing maybePosition || not (isValidMove color board (fromJust maybePosition))
@@ -224,7 +222,7 @@ playerVsCPUMove color board = do
                                     -- if the move is not valid
                                     do
                                         --putStr "Illegal move, Try Again. Enter you move in format: \nline\ncolumn\n\nExample\n4\n3\nColumn 3, line 4\n"
-                                        putStr "Illegal move, Try Again."
+                                        putStr "Illegal move, Try Again. "
                                         putStr lineInstructions
                                         playerVsCPUMove color board
                                 else
@@ -268,10 +266,8 @@ playerVsPlayerMove color board = do
                         do
                             putStr "\n"
                             putStr "Player O Enter your move (line, column): \n"
-                            --line <- getLine
-                            x <- getLine
-                            y <- getLine
-                            let line = "("++ y ++ "," ++ x ++ ")"
+                            xy <- getLine
+                            let line = getCoordinates xy
                             let
                                 maybePosition = maybeRead line
                             if isNothing maybePosition || not (isValidMove color board (fromJust maybePosition))
@@ -279,7 +275,7 @@ playerVsPlayerMove color board = do
                                     -- if the move is not valid
                                     do
                                         --putStr "Illegal move, Try Again.\nEnter you move in format (colum, line), Example (3, 4)\n"
-                                        putStr "Illegal move, Try Again."
+                                        putStr "Illegal move, Try Again. "
                                         putStr lineInstructions
                                         playerVsPlayerMove color board
                                         -- player O move
@@ -289,10 +285,8 @@ playerVsPlayerMove color board = do
                         do
                             putStr "\n"
                             putStr "Player X Enter your move (line, column): \n"
-                            --line <- getLine
-                            x <- getLine
-                            y <- getLine
-                            let line = "("++ y ++ "," ++ x ++ ")"
+                            xy <- getLine
+                            let line = getCoordinates xy
                             let
                                 maybePosition = maybeRead line
                             if isNothing maybePosition || not (isValidMove color board (fromJust maybePosition))
@@ -300,7 +294,7 @@ playerVsPlayerMove color board = do
                                     -- if the move is not valid
                                     do
                                         --putStr "Illegal move, Try Again.\nEnter you move in format (colum, line), Example (3, 4)\n"
-                                        putStr "Illegal move, Try Again."
+                                        putStr "Illegal move, Try Again. "
                                         putStr lineInstructions
                                         playerVsPlayerMove color board
                                         -- Player X move
@@ -316,7 +310,8 @@ playerVsPlayerMove color board = do
                                     playerVsPlayerMove nextColor resultingBoard
 
 
-
+getCoordinates :: String -> String  
+getCoordinates all@(x:xs) = "("++ last [xs] ++ "," ++ [x] ++ ")"
 
 
 main = do display_instructions
