@@ -1,4 +1,4 @@
-play(Depth, Size) :-
+start_game(Depth, Size) :-
 	board_build(Board, Size),
 	game_loop(Board, Depth, black).
 
@@ -22,15 +22,15 @@ game_loop(Board, Depth, white):-
 game_loop(Board, _, Color):-
 	full_board(Board),
 	print_board(Board),
-	count_pieces(Color, Board, Pieces, RivalPieces),
+	count_pieces(Color, Board, Pieces, AdversaryPieces),
 	writef('%d: %d\n', [Color, Pieces]),
-	rival_color(Color, RivalColor),
-	writef('%d: %d\n', [RivalColor, RivalPieces]),!.
+	rival_color(Color, AdversaryColor),
+	writef('%d: %d\n', [AdversaryColor, AdversaryPieces]),!.
 
 game_loop(Board, Depth, Color):-
 	find_moves(Board, Color, MovesList),!,
 	not(member(_,MovesList)),!,
 	print_player(Color),
 	writeln('There\'s no valid move'),
-	rival_color(Color, RivalColor),
-	game_loop(Board, Depth, RivalColor),!.
+	rival_color(Color, AdversaryColor),
+	game_loop(Board, Depth, AdversaryColor),!.
