@@ -70,3 +70,40 @@ generate_board(Board, 8) :-  /* generate the board */
 		[empty, empty, empty, empty, empty, empty, empty, empty],
 		[empty, empty, empty, empty, empty, empty, empty, empty],
 		[empty, empty, empty, empty, empty, empty, empty, empty]].
+
+print_board(Board) :-
+	print_board(Board, 0, 0).
+
+print_board(Board, 7, 8) :-
+	writeln('|'),
+	writeln(''),!.
+
+print_board(Board, Row, 0) :-
+	write('|'),
+	piece(Board, Row, 0, Piece),
+	print_piece(Piece),
+	print_board(Board, Row, 1).
+
+print_board(Board, Row, 8) :-
+	Row \= 7,
+	NextRow is Row + 1,
+	writeln('|,'),
+	print_board(Board, NextRow, 0).
+
+print_board(Board, Row, Column) :-
+	Column \= 0,
+	write(','),
+	piece(Board, Row, Column, Piece),
+	print_piece(Piece),
+	NextColumn is Column + 1,
+	print_board(Board, Row, NextColumn).
+
+
+print_piece(black):-
+	write('X').
+
+print_piece(white):-
+	write('O').
+
+print_piece(empty):-
+	write('-').
