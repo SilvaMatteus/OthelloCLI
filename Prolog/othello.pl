@@ -71,7 +71,7 @@ generate_board(Board, 8) :-  /* generate the board */
 		[empty, empty, empty, empty, empty, empty, empty, empty],
 		[empty, empty, empty, empty, empty, empty, empty, empty]].
 
-print_board(Board) :-
+print_board(Board) :-  /* some print board methods relations */
 	print_board(Board, 0, 0).
 
 print_board(Board, 7, 8) :-
@@ -99,7 +99,7 @@ print_board(Board, Row, Column) :-
 	print_board(Board, Row, NextColumn).
 
 
-print_piece(black):-
+print_piece(black):- /* piece relations */
 	write('X').
 
 print_piece(white):-
@@ -107,3 +107,56 @@ print_piece(white):-
 
 print_piece(empty):-
 	write('-').
+
+piece(Board, RowIndex, ColumnIndex, Piece) :- /* piece validation */
+	is_valid_index(RowIndex),
+	is_valid_index(ColumnIndex),
+	nth0(RowIndex, Board, Row),
+	nth0(ColumnIndex, Row, Piece).
+
+final(Board, Value):-
+	complete_board(Board),
+	count_pieces(black, Board, BlackPieces, WhitePieces),
+	Value is BlackPieces - WhitePieces.
+
+evaluate(Board, Value):- /* evaluate board relations */
+	count_pieces(black, Board, BlackPieces, WhitePieces),
+	Hvalue1 is BlackPieces - WhitePieces,
+	valid_positions(Board, black, BlackValidMoves),
+	valid_positions(Board, white, WhiteValidMoves),
+	Hvalue2 is BlackValidMoves - WhiteValidMoves,
+	max_list([Hvalue1,Hvalue2], Value).
+
+empty_on_board(Board):-
+	member(Row, Board),
+	member(Piece, Row),
+	Piece = empty,!.
+
+complete_board(Board):- /* search in board relations */
+	flatten(Board, PiecesList),
+	list_to_set(PiecesList, PiecesSet),
+	not(member(empty, PiecesSet)).
+
+complete_board(Board, Color, Value):-
+	flatten(Board, PiecesList),
+	list_to_set(PiecesList, PiecesSet),
+	not(member(empty, PiecesSet)),
+	count_pieces(Color, Board, Pieces, RivalPieces),
+	Value is Pieces - RivalPieces.
+
+search_states(State, Color, StatesList):-
+	search_in_boards(State, Color, StatesList).
+	search_in_boards(Board, Color, BoardsList):-
+	find_moves(Board, Color, MovesList),
+	search_in_boards(Board, Color, OrderedBoardsList, [], MovesList),
+	first_elements(OrderedBoardsList, [], BoardsList).
+
+search_in_boards(Board,_, BoardsList, [], []):-
+	append([], [[Board, 0]], BoardsList),!.
+
+search_in_boards(_, _, BoardsList, BoardsList, []):-!.
+
+search_in_boards(Board, Color, BoardsList, CurrentBoardsList, [Move|RestMovesList]):-
+	set_piece(Board, Move, Color, FinalBoard),
+	order_boards(Color, CurrentBoardsList, FinalBoard, NBoardsList),
+	search_in_boards(Board, Color, BoardsList, NBoardsList, RestMovesList),!.
