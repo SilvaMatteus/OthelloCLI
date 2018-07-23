@@ -115,7 +115,7 @@ piece(Board, RowIndex, ColumnIndex, Piece) :- /* piece validation */
 	nth0(ColumnIndex, Row, Piece).
 
 final(Board, Value):-
-	complete_board(Board),
+	full_board(Board),
 	count_pieces(black, Board, BlackPieces, WhitePieces),
 	Value is BlackPieces - WhitePieces.
 
@@ -132,12 +132,12 @@ empty_on_board(Board):-
 	member(Piece, Row),
 	Piece = empty,!.
 
-complete_board(Board):- /* search in board relations */
+full_board(Board):- /* search in board relations */
 	flatten(Board, PiecesList),
 	list_to_set(PiecesList, PiecesSet),
 	not(member(empty, PiecesSet)).
 
-complete_board(Board, Color, Value):-
+full_board(Board, Color, Value):-
 	flatten(Board, PiecesList),
 	list_to_set(PiecesList, PiecesSet),
 	not(member(empty, PiecesSet)),
@@ -190,7 +190,7 @@ generate_valid_positions(Board, Color, RowIndex, 8, CurrentNumber, FinalNumber):
 	generate_valid_positions(Board, Color, NRowIndex, 0, CurrentNumber, FinalNumber),!.
 
 generate_valid_positions(Board, Color, RowIndex, ColumnIndex, CurrentNumber, FinalNumber):-
-	single_valid_move(Board, RowIndex, ColumnIndex, Color),
+	valid_move(Board, RowIndex, ColumnIndex, Color),
 	NCurrentNumber is CurrentNumber + 1,
 	NColumnIndex is ColumnIndex + 1,
 	generate_valid_positions(Board, Color, RowIndex, NColumnIndex, NCurrentNumber, FinalNumber),!.
@@ -199,7 +199,7 @@ generate_valid_positions(Board, Color, RowIndex, ColumnIndex, CurrentNumber, Fin
 	NColumnIndex is ColumnIndex + 1,
 	generate_valid_positions(Board, Color, RowIndex, NColumnIndex, CurrentNumber, FinalNumber),!.
 
-single_valid_move(Board, RowIndex, ColumnIndex, Color) :-
+valid_move(Board, RowIndex, ColumnIndex, Color) :-
 	piece(Board, RowIndex, ColumnIndex, Piece),
 	Piece = empty,
 	direction_offsets(DirectionOffsets),
@@ -277,4 +277,3 @@ find_piece_byColor(Board, RowIndex, ColumnIndex, RowOffset, ColumnOffset, Color)
 	adversary_color(Color, RivalColor),
 	Piece = RivalColor,
 	find_piece_byColor(Board, NRowIndex, NColumnIndex, RowOffset, ColumnOffset, Color).
-
