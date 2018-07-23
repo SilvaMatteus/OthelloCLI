@@ -160,3 +160,121 @@ search_in_boards(Board, Color, BoardsList, CurrentBoardsList, [Move|RestMovesLis
 	set_piece(Board, Move, Color, FinalBoard),
 	order_boards(Color, CurrentBoardsList, FinalBoard, NBoardsList),
 	search_in_boards(Board, Color, BoardsList, NBoardsList, RestMovesList),!.
+
+order_boards(Color, CurrentBoardsList, FinalBoard, NBoardsList):-
+	adversary_color(Color, RivalColor),
+	generate_valid_positions(FinalBoard, RivalColor, Number),
+	boards_ordered_by([FinalBoard, Number], CurrentBoardsList, [], NBoardsList).
+
+boards_ordered_by(Board, [], CurrentList, FinalList):-
+	append(CurrentList, [Board], FinalList),!.
+
+boards_ordered_by(Board, [First|Rest], CurrentList, FinalList):-
+	nth0(1, First, Value),
+	nth0(1, Board, NewValue),
+	NewValue =< Value,
+	append(CurrentList, [Board], TempList),
+	append(TempList, [First|Rest], FinalList),!.
+
+boards_ordered_by(Board, [First|Rest], CurrentList, FinalList):-
+	append(CurrentList, [First], NCurrentList),
+	boards_ordered_by(Board, Rest, NCurrentList, FinalList),!.
+
+generate_valid_positions(Board, Color, Number):-
+	generate_valid_positions(Board, Color, 0, 0, 0, Number).
+
+generate_valid_positions(_, _, 7, 8, Number, Number):-!.
+
+generate_valid_positions(Board, Color, RowIndex, 8, CurrentNumber, FinalNumber):-
+	NRowIndex is RowIndex + 1,
+	generate_valid_positions(Board, Color, NRowIndex, 0, CurrentNumber, FinalNumber),!.
+
+generate_valid_positions(Board, Color, RowIndex, ColumnIndex, CurrentNumber, FinalNumber):-
+	single_valid_move(Board, RowIndex, ColumnIndex, Color),
+	NCurrentNumber is CurrentNumber + 1,
+	NColumnIndex is ColumnIndex + 1,
+	generate_valid_positions(Board, Color, RowIndex, NColumnIndex, NCurrentNumber, FinalNumber),!.
+
+generate_valid_positions(Board, Color, RowIndex, ColumnIndex, CurrentNumber, FinalNumber):-
+	NColumnIndex is ColumnIndex + 1,
+	generate_valid_positions(Board, Color, RowIndex, NColumnIndex, CurrentNumber, FinalNumber),!.
+
+single_valid_move(Board, RowIndex, ColumnIndex, Color) :-
+	piece(Board, RowIndex, ColumnIndex, Piece),
+	Piece = empty,
+	direction_offsets(DirectionOffsets),
+	member(DirectionOffset, DirectionOffsets),
+	nth0(0, DirectionOffset, RowOffset),
+	nth0(1, DirectionOffset, ColumnOffset),
+	NeighborRow is RowIndex + RowOffset,
+	NeighborColumn is ColumnIndex + ColumnOffset,
+	adversary_color(Color, RivalColor),
+	piece(Board, NeighborRow, NeighborColumn, NeighborPiece),
+	NeighborPiece = RivalColor,
+	find_piece_byColor(Board, NeighborRow, NeighborColumn, RowOffset, ColumnOffset, Color),!.
+
+find_moves(Board, Color, MovesList):-
+	find_moves(Board, Color, 0, 0, [], MovesList).
+
+find_moves(_, _, 7, 8, MovesList, MovesList):-!.
+
+find_moves(Board, Color, RowIndex, 8, MovesList, FinalList):-
+	NRowIndex is RowIndex + 1,
+	find_moves(Board, Color, NRowIndex, 0, MovesList, FinalList),!.
+
+find_moves(Board, Color, RowIndex, ColumnIndex, MovesList, FinalList):-
+	check_valid_move(Board, RowIndex, ColumnIndex, Color, ValidDirectionOffsets),
+	append(MovesList,[[RowIndex, ColumnIndex, ValidDirectionOffsets]], NMovesList),
+	NColumnIndex is ColumnIndex + 1,
+	find_moves(Board, Color, RowIndex, NColumnIndex, NMovesList, FinalList),!.
+
+find_moves(Board, Color, RowIndex, ColumnIndex, MovesList, FinalList):-
+	NColumnIndex is ColumnIndex + 1,
+	find_moves(Board, Color, RowIndex, NColumnIndex, MovesList, FinalList),!.
+
+check_valid_move(Board, RowIndex, ColumnIndex, Color, ValidDirectionOffsets):-
+	piece(Board, RowIndex, ColumnIndex, Piece),
+	Piece = empty,
+	direction_offsets(DirectionOffsets),
+	check_valid_move(Board, RowIndex, ColumnIndex, Color, DirectionOffsets, [], ValidDirectionOffsets).
+
+check_valid_move(_, _, _, _, [], CurrentValidDirectionOffsets, ValidDirectionOffsets):-
+	CurrentValidDirectionOffsets \= [],
+	CurrentValidDirectionOffsets = ValidDirectionOffsets.
+
+check_valid_move(Board, RowIndex, ColumnIndex, Color, DirectionOffsets, CurrentValidDirectionOffsets, ValidDirectionOffsets):-
+	DirectionOffsets = [DirectionOffset|DirectionOffsetsRest],
+	valid_move_offset(Board, RowIndex, ColumnIndex, Color, DirectionOffset),
+	append(CurrentValidDirectionOffsets, [DirectionOffset], NCurrentValidDirectionOffsets),
+	check_valid_move(Board, RowIndex, ColumnIndex, Color, DirectionOffsetsRest, NCurrentValidDirectionOffsets, ValidDirectionOffsets).
+
+check_valid_move(Board, RowIndex, ColumnIndex, Color, DirectionOffsets, CurrentValidDirectionOffsets, ValidDirectionOffsets):-
+	DirectionOffsets = [_|DirectionOffsetsRest],
+	check_valid_move(Board, RowIndex, ColumnIndex, Color, DirectionOffsetsRest, CurrentValidDirectionOffsets, ValidDirectionOffsets).
+
+valid_move_offset(Board, RowIndex, ColumnIndex, Color, DirectionOffset):-
+	piece(Board, RowIndex, ColumnIndex, Piece),
+	Piece = empty,
+	nth0(0, DirectionOffset, RowOffset),
+	nth0(1, DirectionOffset, ColumnOffset),
+	NeighborRow is RowIndex + RowOffset,
+	NeighborColumn is ColumnIndex + ColumnOffset,
+	adversary_color(Color, RivalColor),
+	piece(Board, NeighborRow, NeighborColumn, NeighborPiece),
+	NeighborPiece = RivalColor,
+	find_piece_byColor(Board, NeighborRow, NeighborColumn, RowOffset, ColumnOffset, Color).
+
+find_piece_byColor(Board, RowIndex, ColumnIndex, RowOffset, ColumnOffset, Color) :-
+	NRowOffset is RowIndex + RowOffset,
+	NColumnOffset is ColumnIndex + ColumnOffset,
+	piece(Board, NRowOffset, NColumnOffset, Piece),
+	Piece = Color.
+
+find_piece_byColor(Board, RowIndex, ColumnIndex, RowOffset, ColumnOffset, Color) :-
+	NRowIndex is RowIndex + RowOffset,
+	NColumnIndex is ColumnIndex + ColumnOffset,
+	piece(Board, NRowIndex, NColumnIndex, Piece),
+	adversary_color(Color, RivalColor),
+	Piece = RivalColor,
+	find_piece_byColor(Board, NRowIndex, NColumnIndex, RowOffset, ColumnOffset, Color).
+
