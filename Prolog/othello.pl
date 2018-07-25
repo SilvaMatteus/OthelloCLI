@@ -169,8 +169,8 @@ final(Board, Value):-
 evaluate(Board, Value):-
 	count_pieces(black, Board, BlackPieces, WhitePieces),
 	Hvalue1 is BlackPieces - WhitePieces,
-	valid_positions(Board, black, BlackValidMoves),
-	valid_positions(Board, white, WhiteValidMoves),
+	generate_valid_positions(Board, black, BlackValidMoves),
+	generate_valid_positions(Board, white, WhiteValidMoves),
 	Hvalue2 is BlackValidMoves - WhiteValidMoves,
 	max_list([Hvalue1,Hvalue2], Value).
 
@@ -211,7 +211,7 @@ search_in_boards(Board, Color, BoardsList, CurrentBoardsList, [Move|RestMovesLis
 
 order_boards(Color, CurrentBoardsList, FinalBoard, NBoardsList):-
 	adversary_color(Color, RivalColor),
-	valid_positions(FinalBoard, RivalColor, Number),
+	generate_valid_positions(FinalBoard, RivalColor, Number),
 	order_boards_2([FinalBoard, Number], CurrentBoardsList, [], NBoardsList).
 
 order_boards_2(Board, [], CurrentList, FinalList):-
@@ -228,24 +228,24 @@ order_boards_2(Board, [First|Rest], CurrentList, FinalList):-
 	append(CurrentList, [First], NCurrentList),
 	order_boards_2(Board, Rest, NCurrentList, FinalList),!.
 
-valid_positions(Board, Color, Number):-
-	valid_positions(Board, Color, 0, 0, 0, Number).
+generate_valid_positions(Board, Color, Number):-
+	generate_valid_positions(Board, Color, 0, 0, 0, Number).
 
-valid_positions(_, _, 7, 8, Number, Number):-!.
+generate_valid_positions(_, _, 7, 8, Number, Number):-!.
 
-valid_positions(Board, Color, RowIndex, 8, CurrentNumber, FinalNumber):-
+generate_valid_positions(Board, Color, RowIndex, 8, CurrentNumber, FinalNumber):-
 	NRowIndex is RowIndex + 1,
-	valid_positions(Board, Color, NRowIndex, 0, CurrentNumber, FinalNumber),!.
+	generate_valid_positions(Board, Color, NRowIndex, 0, CurrentNumber, FinalNumber),!.
 
-valid_positions(Board, Color, RowIndex, ColumnIndex, CurrentNumber, FinalNumber):-
+generate_valid_positions(Board, Color, RowIndex, ColumnIndex, CurrentNumber, FinalNumber):-
 	single_valid_move(Board, RowIndex, ColumnIndex, Color),
 	NCurrentNumber is CurrentNumber + 1,
 	NColumnIndex is ColumnIndex + 1,
-	valid_positions(Board, Color, RowIndex, NColumnIndex, NCurrentNumber, FinalNumber),!.
+	generate_valid_positions(Board, Color, RowIndex, NColumnIndex, NCurrentNumber, FinalNumber),!.
 
-valid_positions(Board, Color, RowIndex, ColumnIndex, CurrentNumber, FinalNumber):-
+generate_valid_positions(Board, Color, RowIndex, ColumnIndex, CurrentNumber, FinalNumber):-
 	NColumnIndex is ColumnIndex + 1,
-	valid_positions(Board, Color, RowIndex, NColumnIndex, CurrentNumber, FinalNumber),!.
+	generate_valid_positions(Board, Color, RowIndex, NColumnIndex, CurrentNumber, FinalNumber),!.
 
 single_valid_move(Board, RowIndex, ColumnIndex, Color) :-
 	piece(Board, RowIndex, ColumnIndex, Piece),
@@ -271,7 +271,7 @@ find_moves(Board, Color, RowIndex, 8, MovesList, FinalList):-
 	find_moves(Board, Color, NRowIndex, 0, MovesList, FinalList),!.
 
 find_moves(Board, Color, RowIndex, ColumnIndex, MovesList, FinalList):-
-	valid_move(Board, RowIndex, ColumnIndex, Color, ValidDirectionOffsets),
+	check_valid_move(Board, RowIndex, ColumnIndex, Color, ValidDirectionOffsets),
 	append(MovesList,[[RowIndex, ColumnIndex, ValidDirectionOffsets]], NMovesList),
 	NColumnIndex is ColumnIndex + 1,
 	find_moves(Board, Color, RowIndex, NColumnIndex, NMovesList, FinalList),!.
@@ -280,25 +280,25 @@ find_moves(Board, Color, RowIndex, ColumnIndex, MovesList, FinalList):-
 	NColumnIndex is ColumnIndex + 1,
 	find_moves(Board, Color, RowIndex, NColumnIndex, MovesList, FinalList),!.
 
-valid_move(Board, RowIndex, ColumnIndex, Color, ValidDirectionOffsets):-
+check_valid_move(Board, RowIndex, ColumnIndex, Color, ValidDirectionOffsets):-
 	piece(Board, RowIndex, ColumnIndex, Piece),
 	Piece = empty,
 	direction_offsets(DirectionOffsets),
-	valid_move(Board, RowIndex, ColumnIndex, Color, DirectionOffsets, [], ValidDirectionOffsets).
+	check_valid_move(Board, RowIndex, ColumnIndex, Color, DirectionOffsets, [], ValidDirectionOffsets).
 
-valid_move(_, _, _, _, [], CurrentValidDirectionOffsets, ValidDirectionOffsets):-
+check_valid_move(_, _, _, _, [], CurrentValidDirectionOffsets, ValidDirectionOffsets):-
 	CurrentValidDirectionOffsets \= [],
 	CurrentValidDirectionOffsets = ValidDirectionOffsets.
 
-valid_move(Board, RowIndex, ColumnIndex, Color, DirectionOffsets, CurrentValidDirectionOffsets, ValidDirectionOffsets):-
+check_valid_move(Board, RowIndex, ColumnIndex, Color, DirectionOffsets, CurrentValidDirectionOffsets, ValidDirectionOffsets):-
 	DirectionOffsets = [DirectionOffset|DirectionOffsetsRest],
 	valid_move_offset(Board, RowIndex, ColumnIndex, Color, DirectionOffset),
 	append(CurrentValidDirectionOffsets, [DirectionOffset], NCurrentValidDirectionOffsets),
-	valid_move(Board, RowIndex, ColumnIndex, Color, DirectionOffsetsRest, NCurrentValidDirectionOffsets, ValidDirectionOffsets).
+	check_valid_move(Board, RowIndex, ColumnIndex, Color, DirectionOffsetsRest, NCurrentValidDirectionOffsets, ValidDirectionOffsets).
 
-valid_move(Board, RowIndex, ColumnIndex, Color, DirectionOffsets, CurrentValidDirectionOffsets, ValidDirectionOffsets):-
+check_valid_move(Board, RowIndex, ColumnIndex, Color, DirectionOffsets, CurrentValidDirectionOffsets, ValidDirectionOffsets):-
 	DirectionOffsets = [_|DirectionOffsetsRest],
-	valid_move(Board, RowIndex, ColumnIndex, Color, DirectionOffsetsRest, CurrentValidDirectionOffsets, ValidDirectionOffsets).
+	check_valid_move(Board, RowIndex, ColumnIndex, Color, DirectionOffsetsRest, CurrentValidDirectionOffsets, ValidDirectionOffsets).
 
 valid_move_offset(Board, RowIndex, ColumnIndex, Color, DirectionOffset):-
 	piece(Board, RowIndex, ColumnIndex, Piece),
@@ -334,7 +334,7 @@ put_piece_in(Board, Move, Color, FinalBoard):-
 	put_pieces_on_offsets(BoardWithPiece, Row, Column, Color, ValidDirectionOffsets, FinalBoard).
 
 put_piece_in(Board, PieceRowIndex, PieceColumnIndex, Color, FinalBoard):-
-	valid_move(Board, PieceRowIndex, PieceColumnIndex, Color, ValidDirectionOffsets),
+	check_valid_move(Board, PieceRowIndex, PieceColumnIndex, Color, ValidDirectionOffsets),
 	set_single_piece(Board, PieceRowIndex, PieceColumnIndex, Color, BoardWithPiece),
 	put_pieces_on_offsets(BoardWithPiece, PieceRowIndex, PieceColumnIndex, Color, ValidDirectionOffsets, FinalBoard).
 
