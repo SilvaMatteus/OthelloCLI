@@ -2,7 +2,7 @@ start_game() :-   /* main relation, starts the game loop */
 	generate_board(Board, 8),
 	game_loop(Board, 1, black).
 
-% some auxiliar relations
+% some auxiliar relations to manipulate data
 first_elements([], BoardsList, BoardsList):-!.
 
 first_elements([First|Rest], Temp, Boards):-
@@ -10,44 +10,29 @@ first_elements([First|Rest], Temp, Boards):-
 	append(Temp, [Board], NTemp),
 	first_elements(Rest, NTemp, Boards).
 
-first_n_elements(Number, List, NList):-
-		length(List, N),
-		N =< Number,
-		List = NList,!.
-
-first_n_elements(Number, List, NList):-
-	first_n_elements_2(Number, List, [], NList).
-
-first_n_elements_2(0, _, NList, NList):-!.
-
-first_n_elements_2(Number, [First|Rest], TempList, NList):-
-	NNumber is Number - 1,
-	append(TempList, [First], NTempList),
-	first_n_elements_2(NNumber, Rest, NTempList, NList).
-
 min_list([First|Rest], Min):-
-	min_list_2(Rest, First, Min).
+	min_list_aux(Rest, First, Min).
 
-min_list_2([], Min, Min):-!.
+min_list_aux([], Min, Min):-!.
 
-min_list_2([First|Rest], CurrentMin, Min):-
+min_list_aux([First|Rest], CurrentMin, Min):-
 	First < CurrentMin,
-	min_list_2(Rest, First, Min),!.
+	min_list_aux(Rest, First, Min),!.
 
-min_list_2([_|Rest], CurrentMin, Min):-
-	min_list_2(Rest, CurrentMin, Min),!.
+min_list_aux([_|Rest], CurrentMin, Min):-
+	min_list_aux(Rest, CurrentMin, Min),!.
 
 max_list([First|Rest], Max):-
-	max_list_2(Rest, First, Max).
+	max_list_aux(Rest, First, Max).
 
-max_list_2([], Max, Max):-!.
+max_list_aux([], Max, Max):-!.
 
-max_list_2([First|Rest], CurrentMax, Max):-
+max_list_aux([First|Rest], CurrentMax, Max):-
 	First > CurrentMax,
-	max_list_2(Rest, First, Max),!.
+	max_list_aux(Rest, First, Max),!.
 
-max_list_2([_|Rest], CurrentMax, Max):-
-	max_list_2(Rest, CurrentMax, Max),!.
+max_list_aux([_|Rest], CurrentMax, Max):-
+	max_list_aux(Rest, CurrentMax, Max),!.
 
 game_loop(Board, Depth, black):- /* overloaded game loops manager */
 	print_board(Board),
@@ -56,7 +41,7 @@ game_loop(Board, Depth, black):- /* overloaded game loops manager */
 	cpu_select_move(Board, Depth, black, FinalBoard),!,
 	game_loop(FinalBoard, Depth, white),!.
 
-game_loop(Board, Depth, white):-   /* To Do some relations */
+game_loop(Board, Depth, white):-   /* complements game_loop */
 	print_board(Board),
 	print_player(white),
 	empty_on_board(Board),
@@ -88,7 +73,7 @@ print_player(white):-  /* print player prompts */
 print_player(black):-
 	writeln('Player X Enter your move:'),!.
 
-player_select_move(Move, MovesList):- /* to Do some relations */
+player_select_move(Move, MovesList):- /* processs player move */
 	write('Enter the Row: '),
 	read(SelectedRow),
 	writeln('Enter the Column: '),
@@ -103,12 +88,12 @@ player_select_move(Move, MovesList):-
 	player_select_move(Move, MovesList).
 
 cpu_select_move(Board, Depth, Color, FinalBoard):-
-	pruning(Board, Depth, Color, FinalBoard, _). /* to DO cpu prunning */
+	pruning(Board, Depth, Color, FinalBoard, _).
 
 adversary_color(white, black).
 adversary_color(black, white).
 
-generate_board(Board, 8) :-  /* generate the board */
+generate_board(Board, 8) :-  /* generate  empty the board */
 		Board = [[empty, empty, empty, empty, empty, empty, empty, empty],
 		[empty, empty, empty, empty, empty, empty, empty, empty],
 		[empty, empty, empty, empty, empty, empty, empty, empty],
@@ -134,7 +119,7 @@ print_board(Board, Row, 0) :-
 print_board(Board, Row, 8) :-
 	Row \= 7,
 	NextRow is Row + 1,
-	writeln('|,'),
+	writeln('|'),
 	print_board(Board, NextRow, 0).
 
 print_board(Board, Row, Column) :-
