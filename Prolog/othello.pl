@@ -2,6 +2,53 @@ start_game() :-   /* main relation, starts the game loop */
 	generate_board(Board, 8),
 	game_loop(Board, 1, black).
 
+% some auxiliar relations
+first_elements([], BoardsList, BoardsList):-!.
+
+first_elements([First|Rest], Temp, Boards):-
+	nth0(0, First, Board),
+	append(Temp, [Board], NTemp),
+	first_elements(Rest, NTemp, Boards).
+
+first_n_elements(Number, List, NList):-
+		length(List, N),
+		N =< Number,
+		List = NList,!.
+
+first_n_elements(Number, List, NList):-
+	first_n_elements_2(Number, List, [], NList).
+
+first_n_elements_2(0, _, NList, NList):-!.
+
+first_n_elements_2(Number, [First|Rest], TempList, NList):-
+	NNumber is Number - 1,
+	append(TempList, [First], NTempList),
+	first_n_elements_2(NNumber, Rest, NTempList, NList).
+
+min_list([First|Rest], Min):-
+	min_list_2(Rest, First, Min).
+
+min_list_2([], Min, Min):-!.
+
+min_list_2([First|Rest], CurrentMin, Min):-
+	First < CurrentMin,
+	min_list_2(Rest, First, Min),!.
+
+min_list_2([_|Rest], CurrentMin, Min):-
+	min_list_2(Rest, CurrentMin, Min),!.
+
+max_list([First|Rest], Max):-
+	max_list_2(Rest, First, Max).
+
+max_list_2([], Max, Max):-!.
+
+max_list_2([First|Rest], CurrentMax, Max):-
+	First > CurrentMax,
+	max_list_2(Rest, First, Max),!.
+
+max_list_2([_|Rest], CurrentMax, Max):-
+	max_list_2(Rest, CurrentMax, Max),!.
+
 game_loop(Board, Depth, black):- /* overloaded game loops manager */
 	print_board(Board),
 	print_player(black),
@@ -16,11 +63,11 @@ game_loop(Board, Depth, white):-   /* To Do some relations */
 	find_moves(Board, white, MovesList),
 	member(_, MovesList),
 	player_select_move(Move, MovesList),!,
-	set_piece(Board, Move, white, FinalBoard),
+	put_piece_in(Board, Move, white, FinalBoard),
 	game_loop(FinalBoard, Depth, black),!.
 
 game_loop(Board, _, Color):- /* To Do some relations */
-	full_board(Board),
+	complete_board(Board),
 	print_board(Board),
 	count_pieces(Color, Board, Pieces, RivalPieces),
 	writef('%d: %d\n', [Color, Pieces]),
@@ -71,7 +118,7 @@ generate_board(Board, 8) :-  /* generate the board */
 		[empty, empty, empty, empty, empty, empty, empty, empty],
 		[empty, empty, empty, empty, empty, empty, empty, empty]].
 
-print_board(Board) :-  /* some print board methods relations */
+print_board(Board) :-
 	print_board(Board, 0, 0).
 
 print_board(Board, 7, 8) :-
@@ -99,7 +146,7 @@ print_board(Board, Row, Column) :-
 	print_board(Board, Row, NextColumn).
 
 
-print_piece(black):- /* piece relations */
+print_piece(black):-
 	write('X').
 
 print_piece(white):-
@@ -108,18 +155,18 @@ print_piece(white):-
 print_piece(empty):-
 	write('-').
 
-piece(Board, RowIndex, ColumnIndex, Piece) :- /* piece validation */
+piece(Board, RowIndex, ColumnIndex, Piece) :-
 	is_valid_index(RowIndex),
 	is_valid_index(ColumnIndex),
 	nth0(RowIndex, Board, Row),
 	nth0(ColumnIndex, Row, Piece).
 
 final(Board, Value):-
-	full_board(Board),
+	complete_board(Board),
 	count_pieces(black, Board, BlackPieces, WhitePieces),
 	Value is BlackPieces - WhitePieces.
 
-evaluate(Board, Value):- /* evaluate board relations */
+evaluate(Board, Value):-
 	count_pieces(black, Board, BlackPieces, WhitePieces),
 	Hvalue1 is BlackPieces - WhitePieces,
 	valid_positions(Board, black, BlackValidMoves),
@@ -132,12 +179,12 @@ empty_on_board(Board):-
 	member(Piece, Row),
 	Piece = empty,!.
 
-full_board(Board):- /* search in board relations */
+complete_board(Board):-
 	flatten(Board, PiecesList),
 	list_to_set(PiecesList, PiecesSet),
 	not(member(empty, PiecesSet)).
 
-full_board(Board, Color, Value):-
+complete_board(Board, Color, Value):-
 	flatten(Board, PiecesList),
 	list_to_set(PiecesList, PiecesSet),
 	not(member(empty, PiecesSet)),
@@ -146,7 +193,8 @@ full_board(Board, Color, Value):-
 
 search_states(State, Color, StatesList):-
 	search_in_boards(State, Color, StatesList).
-	search_in_boards(Board, Color, BoardsList):-
+
+search_in_boards(Board, Color, BoardsList):-
 	find_moves(Board, Color, MovesList),
 	search_in_boards(Board, Color, OrderedBoardsList, [], MovesList),
 	first_elements(OrderedBoardsList, [], BoardsList).
@@ -157,49 +205,49 @@ search_in_boards(Board,_, BoardsList, [], []):-
 search_in_boards(_, _, BoardsList, BoardsList, []):-!.
 
 search_in_boards(Board, Color, BoardsList, CurrentBoardsList, [Move|RestMovesList]):-
-	set_piece(Board, Move, Color, FinalBoard),
+	put_piece_in(Board, Move, Color, FinalBoard),
 	order_boards(Color, CurrentBoardsList, FinalBoard, NBoardsList),
 	search_in_boards(Board, Color, BoardsList, NBoardsList, RestMovesList),!.
 
 order_boards(Color, CurrentBoardsList, FinalBoard, NBoardsList):-
 	adversary_color(Color, RivalColor),
-	generate_valid_positions(FinalBoard, RivalColor, Number),
-	boards_ordered_by([FinalBoard, Number], CurrentBoardsList, [], NBoardsList).
+	valid_positions(FinalBoard, RivalColor, Number),
+	order_boards_2([FinalBoard, Number], CurrentBoardsList, [], NBoardsList).
 
-boards_ordered_by(Board, [], CurrentList, FinalList):-
+order_boards_2(Board, [], CurrentList, FinalList):-
 	append(CurrentList, [Board], FinalList),!.
 
-boards_ordered_by(Board, [First|Rest], CurrentList, FinalList):-
+order_boards_2(Board, [First|Rest], CurrentList, FinalList):-
 	nth0(1, First, Value),
 	nth0(1, Board, NewValue),
 	NewValue =< Value,
 	append(CurrentList, [Board], TempList),
 	append(TempList, [First|Rest], FinalList),!.
 
-boards_ordered_by(Board, [First|Rest], CurrentList, FinalList):-
+order_boards_2(Board, [First|Rest], CurrentList, FinalList):-
 	append(CurrentList, [First], NCurrentList),
-	boards_ordered_by(Board, Rest, NCurrentList, FinalList),!.
+	order_boards_2(Board, Rest, NCurrentList, FinalList),!.
 
-generate_valid_positions(Board, Color, Number):-
-	generate_valid_positions(Board, Color, 0, 0, 0, Number).
+valid_positions(Board, Color, Number):-
+	valid_positions(Board, Color, 0, 0, 0, Number).
 
-generate_valid_positions(_, _, 7, 8, Number, Number):-!.
+valid_positions(_, _, 7, 8, Number, Number):-!.
 
-generate_valid_positions(Board, Color, RowIndex, 8, CurrentNumber, FinalNumber):-
+valid_positions(Board, Color, RowIndex, 8, CurrentNumber, FinalNumber):-
 	NRowIndex is RowIndex + 1,
-	generate_valid_positions(Board, Color, NRowIndex, 0, CurrentNumber, FinalNumber),!.
+	valid_positions(Board, Color, NRowIndex, 0, CurrentNumber, FinalNumber),!.
 
-generate_valid_positions(Board, Color, RowIndex, ColumnIndex, CurrentNumber, FinalNumber):-
-	valid_move(Board, RowIndex, ColumnIndex, Color),
+valid_positions(Board, Color, RowIndex, ColumnIndex, CurrentNumber, FinalNumber):-
+	single_valid_move(Board, RowIndex, ColumnIndex, Color),
 	NCurrentNumber is CurrentNumber + 1,
 	NColumnIndex is ColumnIndex + 1,
-	generate_valid_positions(Board, Color, RowIndex, NColumnIndex, NCurrentNumber, FinalNumber),!.
+	valid_positions(Board, Color, RowIndex, NColumnIndex, NCurrentNumber, FinalNumber),!.
 
-generate_valid_positions(Board, Color, RowIndex, ColumnIndex, CurrentNumber, FinalNumber):-
+valid_positions(Board, Color, RowIndex, ColumnIndex, CurrentNumber, FinalNumber):-
 	NColumnIndex is ColumnIndex + 1,
-	generate_valid_positions(Board, Color, RowIndex, NColumnIndex, CurrentNumber, FinalNumber),!.
+	valid_positions(Board, Color, RowIndex, NColumnIndex, CurrentNumber, FinalNumber),!.
 
-valid_move(Board, RowIndex, ColumnIndex, Color) :-
+single_valid_move(Board, RowIndex, ColumnIndex, Color) :-
 	piece(Board, RowIndex, ColumnIndex, Piece),
 	Piece = empty,
 	direction_offsets(DirectionOffsets),
@@ -223,7 +271,7 @@ find_moves(Board, Color, RowIndex, 8, MovesList, FinalList):-
 	find_moves(Board, Color, NRowIndex, 0, MovesList, FinalList),!.
 
 find_moves(Board, Color, RowIndex, ColumnIndex, MovesList, FinalList):-
-	check_valid_move(Board, RowIndex, ColumnIndex, Color, ValidDirectionOffsets),
+	valid_move(Board, RowIndex, ColumnIndex, Color, ValidDirectionOffsets),
 	append(MovesList,[[RowIndex, ColumnIndex, ValidDirectionOffsets]], NMovesList),
 	NColumnIndex is ColumnIndex + 1,
 	find_moves(Board, Color, RowIndex, NColumnIndex, NMovesList, FinalList),!.
@@ -232,25 +280,25 @@ find_moves(Board, Color, RowIndex, ColumnIndex, MovesList, FinalList):-
 	NColumnIndex is ColumnIndex + 1,
 	find_moves(Board, Color, RowIndex, NColumnIndex, MovesList, FinalList),!.
 
-check_valid_move(Board, RowIndex, ColumnIndex, Color, ValidDirectionOffsets):-
+valid_move(Board, RowIndex, ColumnIndex, Color, ValidDirectionOffsets):-
 	piece(Board, RowIndex, ColumnIndex, Piece),
 	Piece = empty,
 	direction_offsets(DirectionOffsets),
-	check_valid_move(Board, RowIndex, ColumnIndex, Color, DirectionOffsets, [], ValidDirectionOffsets).
+	valid_move(Board, RowIndex, ColumnIndex, Color, DirectionOffsets, [], ValidDirectionOffsets).
 
-check_valid_move(_, _, _, _, [], CurrentValidDirectionOffsets, ValidDirectionOffsets):-
+valid_move(_, _, _, _, [], CurrentValidDirectionOffsets, ValidDirectionOffsets):-
 	CurrentValidDirectionOffsets \= [],
 	CurrentValidDirectionOffsets = ValidDirectionOffsets.
 
-check_valid_move(Board, RowIndex, ColumnIndex, Color, DirectionOffsets, CurrentValidDirectionOffsets, ValidDirectionOffsets):-
+valid_move(Board, RowIndex, ColumnIndex, Color, DirectionOffsets, CurrentValidDirectionOffsets, ValidDirectionOffsets):-
 	DirectionOffsets = [DirectionOffset|DirectionOffsetsRest],
 	valid_move_offset(Board, RowIndex, ColumnIndex, Color, DirectionOffset),
 	append(CurrentValidDirectionOffsets, [DirectionOffset], NCurrentValidDirectionOffsets),
-	check_valid_move(Board, RowIndex, ColumnIndex, Color, DirectionOffsetsRest, NCurrentValidDirectionOffsets, ValidDirectionOffsets).
+	valid_move(Board, RowIndex, ColumnIndex, Color, DirectionOffsetsRest, NCurrentValidDirectionOffsets, ValidDirectionOffsets).
 
-check_valid_move(Board, RowIndex, ColumnIndex, Color, DirectionOffsets, CurrentValidDirectionOffsets, ValidDirectionOffsets):-
+valid_move(Board, RowIndex, ColumnIndex, Color, DirectionOffsets, CurrentValidDirectionOffsets, ValidDirectionOffsets):-
 	DirectionOffsets = [_|DirectionOffsetsRest],
-	check_valid_move(Board, RowIndex, ColumnIndex, Color, DirectionOffsetsRest, CurrentValidDirectionOffsets, ValidDirectionOffsets).
+	valid_move(Board, RowIndex, ColumnIndex, Color, DirectionOffsetsRest, CurrentValidDirectionOffsets, ValidDirectionOffsets).
 
 valid_move_offset(Board, RowIndex, ColumnIndex, Color, DirectionOffset):-
 	piece(Board, RowIndex, ColumnIndex, Piece),
@@ -277,3 +325,173 @@ find_piece_byColor(Board, RowIndex, ColumnIndex, RowOffset, ColumnOffset, Color)
 	adversary_color(Color, RivalColor),
 	Piece = RivalColor,
 	find_piece_byColor(Board, NRowIndex, NColumnIndex, RowOffset, ColumnOffset, Color).
+
+put_piece_in(Board, Move, Color, FinalBoard):-
+	nth0(0, Move, Row),
+	nth0(1, Move, Column),
+ 	nth0(2, Move, ValidDirectionOffsets),
+	set_single_piece(Board, Row, Column, Color, BoardWithPiece),
+	put_pieces_on_offsets(BoardWithPiece, Row, Column, Color, ValidDirectionOffsets, FinalBoard).
+
+put_piece_in(Board, PieceRowIndex, PieceColumnIndex, Color, FinalBoard):-
+	valid_move(Board, PieceRowIndex, PieceColumnIndex, Color, ValidDirectionOffsets),
+	set_single_piece(Board, PieceRowIndex, PieceColumnIndex, Color, BoardWithPiece),
+	put_pieces_on_offsets(BoardWithPiece, PieceRowIndex, PieceColumnIndex, Color, ValidDirectionOffsets, FinalBoard).
+
+put_pieces_on_offsets(FinalBoard, _, _, _, [], FinalBoard):-!.
+
+put_pieces_on_offsets(Board, PieceRowIndex, PieceColumnIndex, Color, ValidDirectionOffsets, FinalBoard):-
+	ValidDirectionOffsets = [ValidDirectionOffset|ValidDirectionOffsetsRest],
+	put_pieces_on_offset(Board, PieceRowIndex, PieceColumnIndex, Color, ValidDirectionOffset, TempBoard),
+	put_pieces_on_offsets(TempBoard, PieceRowIndex, PieceColumnIndex, Color, ValidDirectionOffsetsRest, FinalBoard).
+
+put_pieces_on_offset(Board, PieceRowIndex, PieceColumnIndex, Color, ValidDirectionOffset, FinalBoard):-
+	nth0(0, ValidDirectionOffset, RowOffset),
+	nth0(1, ValidDirectionOffset, ColumnOffset),
+	NRowOffset is PieceRowIndex + RowOffset,
+	NColumnOffset is PieceColumnIndex + ColumnOffset,
+	piece(Board, NRowOffset, NColumnOffset, Piece),
+	Piece = Color,
+	Board = FinalBoard,!.
+
+put_pieces_on_offset(Board, PieceRowIndex, PieceColumnIndex, Color, ValidDirectionOffset, FinalBoard):-
+	nth0(0, ValidDirectionOffset, RowOffset),
+	nth0(1, ValidDirectionOffset, ColumnOffset),
+	NRowOffset is PieceRowIndex + RowOffset,
+	NColumnOffset is PieceColumnIndex + ColumnOffset,
+	piece(Board, NRowOffset, NColumnOffset, Piece),
+	adversary_color(Color, RivalColor),
+	Piece = RivalColor,
+	set_single_piece(Board, NRowOffset, NColumnOffset, Color, TempBoard),
+	put_pieces_on_offset(TempBoard, NRowOffset, NColumnOffset, Color, ValidDirectionOffset, FinalBoard).
+
+set_single_piece(Board, PieceRowIndex, PieceColumnIndex, Color, FinalBoard):-
+	set_single_piece(Board, PieceRowIndex, PieceColumnIndex, 0, 0, Color, [], FinalBoard, []).
+
+set_single_piece(_, 7, _, 7, 8, _, ResultingBoard, FinalBoard, PieceRow):-
+	append(ResultingBoard, [PieceRow], FinalBoard),!.
+
+set_single_piece(_, _, _, 8, 0, _, FinalBoard, FinalBoard, _):-!.
+
+set_single_piece(Board, PieceRowIndex, ColumnRowIndex, PieceRowIndex, 8, Color, ResultingBoard, FinalBoard, RowIndex):-
+	PieceRowIndex \= 7,
+	NCurrentRowIndex is PieceRowIndex + 1,
+	append(ResultingBoard, [RowIndex], NResultingBoard),
+	set_single_piece(Board, PieceRowIndex, ColumnRowIndex, NCurrentRowIndex, 0, Color, NResultingBoard, FinalBoard, []).
+
+set_single_piece(Board, PieceRowIndex, PieceColumnIndex, PieceRowIndex, PieceColumnIndex, Color, ResultingBoard, FinalBoard, PieceRow):-
+	append(PieceRow, [Color], NPieceRow),
+	NCurrentColumnIndex is PieceColumnIndex + 1,
+	set_single_piece(Board, PieceRowIndex, PieceColumnIndex, PieceRowIndex, NCurrentColumnIndex, Color, ResultingBoard, FinalBoard, NPieceRow).
+
+set_single_piece(Board, PieceRowIndex, PieceColumnIndex, PieceRowIndex, CurrentColumnIndex, Color, ResultingBoard, FinalBoard, PieceRow):-
+	CurrentColumnIndex \= PieceColumnIndex,
+	piece(Board, PieceRowIndex, CurrentColumnIndex, Piece),
+	append(PieceRow, [Piece], NPieceRow),
+	NCurrentColumnIndex is CurrentColumnIndex + 1,
+	set_single_piece(Board, PieceRowIndex, PieceColumnIndex, PieceRowIndex, NCurrentColumnIndex, Color, ResultingBoard, FinalBoard, NPieceRow).
+
+set_single_piece(Board, PieceRowIndex, PieceColumnIndex, CurrentRowIndex, _, Color, ResultingBoard, FinalBoard, PieceRow):-
+	PieceRowIndex \= CurrentRowIndex,
+	nth0(CurrentRowIndex, Board, CurrentRow),
+	append(ResultingBoard, [CurrentRow], NResultingBoard),
+	NCurrentRowIndex is CurrentRowIndex + 1,
+	set_single_piece(Board, PieceRowIndex, PieceColumnIndex, NCurrentRowIndex, 0, Color, NResultingBoard, FinalBoard, PieceRow).
+
+count_pieces(Color, Board, Pieces, RivalPieces) :-
+	count_pieces(Color, Board, 0, 0, 0, 0, Pieces, RivalPieces).
+
+count_pieces(_, _, 7, 8, CurrentPieces, CurrentRivalPieces, Pieces, RivalPieces):-
+	Pieces is CurrentPieces,
+	RivalPieces is CurrentRivalPieces,!.
+
+count_pieces(Color, Board, RowIndex, 8, CurrentPieces, CurrentRivalPieces, Pieces, RivalPieces) :-
+	NRowIndex is RowIndex + 1,
+	count_pieces(Color, Board, NRowIndex, 0, CurrentPieces, CurrentRivalPieces, Pieces, RivalPieces).
+
+count_pieces(Color, Board, RowIndex, ColumnIndex, CurrentPieces, CurrentRivalPieces, Pieces, RivalPieces) :-
+	piece(Board, RowIndex, ColumnIndex, Piece),
+	count_piece(Color, Piece, CurrentPieces, CurrentRivalPieces, NCurrentPieces, NCurrentRivalPieces),
+	NColumnIndex is ColumnIndex + 1,
+	count_pieces(Color, Board, RowIndex, NColumnIndex, NCurrentPieces, NCurrentRivalPieces, Pieces, RivalPieces).
+
+count_piece(_, empty, CurrentPieces, CurrentRivalPieces, CurrentPieces, CurrentRivalPieces):-!.
+
+count_piece(Color, Color, CurrentPieces, CurrentRivalPieces, NCurrentPieces, CurrentRivalPieces):-
+	NCurrentPieces is CurrentPieces + 1,!.
+
+count_piece(Color, RivalColor, CurrentPieces, CurrentRivalPieces, CurrentPieces, NCurrentRivalPieces):-
+	adversary_color(Color, RivalColor),
+	NCurrentRivalPieces is CurrentRivalPieces + 1,!.
+
+direction_offsets(OffsetsList) :-
+	OffsetsList = [[-1, 0],
+			[-1, 1],
+			[0, 1],
+			[1, 1],
+			[1, 0],
+			[1, -1],
+			[0, -1],
+			[-1,-1]].
+
+is_valid_index(Index) :-
+	Index >= 0,
+	Index < 8.
+
+pruning(State, Depth, Color, NewState, Value):-
+	pruning(Depth, State, Color, NewState, Value, -1000, 1000).
+
+pruning(_, State, _, State, Value, _, _) :- final(State, Value),!.
+
+pruning(0, State, _, State, Value, _, _) :- evaluate(State, Value),!.
+
+pruning(Depth, State, Color, NewState, Value, Alpha, Beta) :-
+	Depth > 0,
+	search_states(State, Color, StatesList),
+	adversary_color(Color, RivalColor),
+	NDepth is Depth - 1,
+	catch(
+		pruning(StatesList, NDepth, Color, RivalColor, NewState, Value, Alpha, Beta),
+		_,
+		pruning_search(StatesList, Depth, Color, RivalColor, NewState, Value, Alpha, Beta)).
+
+pruning_search(StatesList, Depth, Color, RivalColor, NewState, Value, Alpha, Beta):-
+
+	writef('Search at depth %d\n', [Depth]),
+	pruning(StatesList, 0, Color, RivalColor, NewState, Value, Alpha, Beta).
+
+pruning([State], Depth, _, RivalColor, State, Value, Alpha, Beta):- !,
+	pruning(Depth, State, RivalColor, _, Value, Alpha, Beta).
+
+pruning([State|Rest], Depth, Color, RivalColor, NewState, Value, Alpha, Beta) :-
+	pruning(Depth, State, RivalColor, _, X, Alpha, Beta),
+	(
+		prune(Color, X, Alpha, Beta) ->
+		(
+			NewState = State,
+			Value is X
+		);
+		(
+			recalc(Color, X, Alpha, Beta, Nalpha, NBeta),
+			pruning(Rest, Depth, Color, RivalColor, B, Y, Nalpha, NBeta),
+			best(Color, X, Y, State, B, NewState, Value)
+		)
+
+	).
+
+prune(black, Value, _, Beta):-
+	Value >= Beta.
+
+prune(white, Value, Alpha, _):-
+	Value =< Alpha.
+
+recalc(black, Value, Alpha, Beta, Nalpha, Beta):-
+	max_list([Alpha, Value], Nalpha).
+
+recalc(white, Value, Alpha, Beta, Alpha, NBeta):-
+	min_list([Beta, Value], NBeta).
+
+best(black, X, Y, A, _, A, X):- X>=Y,!.
+best(black, _, Y, _, B, B, Y).
+best(white, X, Y, A, _, A, X):- X=<Y, !.
+best(white, _, Y, _, B, B, Y).
