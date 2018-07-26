@@ -1,6 +1,31 @@
-start_game() :-   /* main relation, starts the game loop */
+start() :-   /* main relation, starts the game loop */
+	print_rules(),
+	print_menu(),
+	read(SelectedOption),
 	generate_board(Board, 8),
-	game_loop(Board, 1, black).
+	game_loop(Board, SelectedOption).
+
+print_rules():-
+	writeln('---------------------------OthelloCLI v3.0----------------------------'),
+	writeln('--------------------------------GOAL----------------------------------'),
+	writeln('----------------------------------------------------------------------'),
+	writeln('The goal is to have the majority of the markers'),
+	writeln('in the board at the end of the game.'),
+	writeln('Each player takes 32 markers and chooses one type (X or O) to'),
+	writeln('use throughout the game. A move consists of outflanking your'),
+	writeln('opponent\'s markers, then flipping the outflanked marks to your marker.'),
+	writeln('----------------------------------------------------------------------'),
+	print_instructions(),
+	writeln('Now, enjoy!\n').
+
+print_menu():-
+	writeln('1 - Player vs Player'),
+	writeln('2 - Player vs CPU'),
+	writeln(''),
+	write('Select your Option: ').
+
+print_instructions():-
+	writeln('Enter your move in format:\n line.\n column.\nExample (line 4, column 3):\n 4.\n 3.\n').
 
 % some auxiliar relations to manipulate data
 first_elements([], BoardsList, BoardsList):-!.
@@ -33,6 +58,12 @@ max_list_aux([First|Rest], CurrentMax, Max):-
 
 max_list_aux([_|Rest], CurrentMax, Max):-
 	max_list_aux(Rest, CurrentMax, Max),!.
+
+game_loop(Board, 1):-
+	writeln('Falta implementar').
+
+game_loop(Board, 2):-
+	game_loop(Board, 1, white).
 
 game_loop(Board, Depth, black):- /* overloaded game loops manager */
 	print_board(Board),
@@ -74,9 +105,9 @@ print_player(black):-
 	writeln('Player X Enter your move:'),!.
 
 player_select_move(Move, MovesList):- /* processs player move */
-	write('Enter the Row: '),
+	write('Enter the Row'),
 	read(SelectedRow),
-	writeln('Enter the Column: '),
+	write('Enter the Column'),
 	read(SelectedColum),
 	member(Move, MovesList),
 	nth0(0, Move, SelectedRow),
@@ -104,13 +135,15 @@ generate_board(Board, 8) :-  /* generate  empty the board */
 		[empty, empty, empty, empty, empty, empty, empty, empty]].
 
 print_board(Board) :-  /* print board relations */
+	writeln('\n  0 1 2 3 4 5 6 7 '),
 	print_board(Board, 0, 0).
 
 print_board(Board, 7, 8) :-
-	writeln('|'),
-	writeln(''),!.
+	writeln('|7'),
+	writeln('  0 1 2 3 4 5 6 7 \n'),!.
 
 print_board(Board, Row, 0) :-
+	write(Row),
 	write('|'),
 	piece(Board, Row, 0, Piece),
 	print_piece(Piece),
@@ -119,12 +152,13 @@ print_board(Board, Row, 0) :-
 print_board(Board, Row, 8) :-
 	Row \= 7,
 	NextRow is Row + 1,
-	writeln('|'),
+	write('|'),
+	writeln(Row),
 	print_board(Board, NextRow, 0).
 
 print_board(Board, Row, Column) :-
 	Column \= 0,
-	write(','),
+	write('.'),
 	piece(Board, Row, Column, Piece),
 	print_piece(Piece),
 	NextColumn is Column + 1,
@@ -138,7 +172,7 @@ print_piece(white):-
 	write('O').
 
 print_piece(empty):-
-	write('-').
+	write('_').
 
 piece(Board, RowIndex, ColumnIndex, Piece) :-
 	is_valid_index(RowIndex),
