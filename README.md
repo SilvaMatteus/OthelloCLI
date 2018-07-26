@@ -49,8 +49,14 @@ To remove binary files:
 
 `clear.sh`
 
+# Prolog
+
+Install swipl. Docs [here](http://www.swi-prolog.org/build/PPA.html).
+
+run `swipl ./othello.pl`
+
 # RoadMap
 
 - C++ (Done)
 - Haskell (Done)
-- Prolog (Future work)
+- Prolog (Done)
