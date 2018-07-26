@@ -51,7 +51,7 @@ game_loop(Board, Depth, white):-   /* complements game_loop */
 	put_piece_in(Board, Move, white, FinalBoard),
 	game_loop(FinalBoard, Depth, black),!.
 
-game_loop(Board, _, Color):- /* To Do some relations */
+game_loop(Board, _, Color):-
 	complete_board(Board),
 	print_board(Board),
 	count_pieces(Color, Board, Pieces, RivalPieces),
@@ -59,7 +59,7 @@ game_loop(Board, _, Color):- /* To Do some relations */
 	adversary_color(Color, RivalColor),
 	writef('%d: %d\n', [RivalColor, RivalPieces]),!.
 
-game_loop(Board, Depth, Color):- /* To do some relations */
+game_loop(Board, Depth, Color):-
 	find_moves(Board, Color, MovesList),!,
 	not(member(_,MovesList)),!,
 	print_player(Color),
@@ -67,7 +67,7 @@ game_loop(Board, Depth, Color):- /* To do some relations */
 	adversary_color(Color, RivalColor),
 	game_loop(Board, Depth, RivalColor),!.
 
-print_player(white):-  /* print player prompts */
+print_player(white):-  /* print players prompts */
 	writeln('Player O Enter your move:'),!.
 
 print_player(black):-
@@ -87,10 +87,10 @@ player_select_move(Move, MovesList):-
 	writeln(''),
 	player_select_move(Move, MovesList).
 
-cpu_select_move(Board, Depth, Color, FinalBoard):-
+cpu_select_move(Board, Depth, Color, FinalBoard):- /* process cpu move */
 	pruning(Board, Depth, Color, FinalBoard, _).
 
-adversary_color(white, black).
+adversary_color(white, black). /* maps the colors */
 adversary_color(black, white).
 
 generate_board(Board, 8) :-  /* generate  empty the board */
@@ -103,7 +103,7 @@ generate_board(Board, 8) :-  /* generate  empty the board */
 		[empty, empty, empty, empty, empty, empty, empty, empty],
 		[empty, empty, empty, empty, empty, empty, empty, empty]].
 
-print_board(Board) :-
+print_board(Board) :-  /* print board relations */
 	print_board(Board, 0, 0).
 
 print_board(Board, 7, 8) :-
@@ -130,7 +130,7 @@ print_board(Board, Row, Column) :-
 	NextColumn is Column + 1,
 	print_board(Board, Row, NextColumn).
 
-
+											/* board representations */
 print_piece(black):-
 	write('X').
 
@@ -146,7 +146,7 @@ piece(Board, RowIndex, ColumnIndex, Piece) :-
 	nth0(RowIndex, Board, Row),
 	nth0(ColumnIndex, Row, Piece).
 
-final(Board, Value):-
+check_game_over(Board, Value):-
 	complete_board(Board),
 	count_pieces(black, Board, BlackPieces, WhitePieces),
 	Value is BlackPieces - WhitePieces.
@@ -197,21 +197,21 @@ search_in_boards(Board, Color, BoardsList, CurrentBoardsList, [Move|RestMovesLis
 order_boards(Color, CurrentBoardsList, FinalBoard, NBoardsList):-
 	adversary_color(Color, RivalColor),
 	generate_valid_positions(FinalBoard, RivalColor, Number),
-	order_boards_2([FinalBoard, Number], CurrentBoardsList, [], NBoardsList).
+	order_boards_aux([FinalBoard, Number], CurrentBoardsList, [], NBoardsList).
 
-order_boards_2(Board, [], CurrentList, FinalList):-
+order_boards_aux(Board, [], CurrentList, FinalList):-
 	append(CurrentList, [Board], FinalList),!.
 
-order_boards_2(Board, [First|Rest], CurrentList, FinalList):-
+order_boards_aux(Board, [First|Rest], CurrentList, FinalList):-
 	nth0(1, First, Value),
 	nth0(1, Board, NewValue),
 	NewValue =< Value,
 	append(CurrentList, [Board], TempList),
 	append(TempList, [First|Rest], FinalList),!.
 
-order_boards_2(Board, [First|Rest], CurrentList, FinalList):-
+order_boards_aux(Board, [First|Rest], CurrentList, FinalList):-
 	append(CurrentList, [First], NCurrentList),
-	order_boards_2(Board, Rest, NCurrentList, FinalList),!.
+	order_boards_aux(Board, Rest, NCurrentList, FinalList),!.
 
 generate_valid_positions(Board, Color, Number):-
 	generate_valid_positions(Board, Color, 0, 0, 0, Number).
@@ -426,7 +426,7 @@ is_valid_index(Index) :-
 pruning(State, Depth, Color, NewState, Value):-
 	pruning(Depth, State, Color, NewState, Value, -1000, 1000).
 
-pruning(_, State, _, State, Value, _, _) :- final(State, Value),!.
+pruning(_, State, _, State, Value, _, _) :- check_game_over(State, Value),!.
 
 pruning(0, State, _, State, Value, _, _) :- evaluate(State, Value),!.
 
@@ -457,7 +457,7 @@ pruning([State|Rest], Depth, Color, RivalColor, NewState, Value, Alpha, Beta) :-
 			Value is X
 		);
 		(
-			recalc(Color, X, Alpha, Beta, Nalpha, NBeta),
+			reevaluate(Color, X, Alpha, Beta, Nalpha, NBeta),
 			pruning(Rest, Depth, Color, RivalColor, B, Y, Nalpha, NBeta),
 			best(Color, X, Y, State, B, NewState, Value)
 		)
@@ -470,10 +470,11 @@ prune(black, Value, _, Beta):-
 prune(white, Value, Alpha, _):-
 	Value =< Alpha.
 
-recalc(black, Value, Alpha, Beta, Nalpha, Beta):-
+/* reevaluate search  */
+reevaluate(black, Value, Alpha, Beta, Nalpha, Beta):-
 	max_list([Alpha, Value], Nalpha).
 
-recalc(white, Value, Alpha, Beta, Alpha, NBeta):-
+reevaluate(white, Value, Alpha, Beta, Alpha, NBeta):-
 	min_list([Beta, Value], NBeta).
 
 best(black, X, Y, A, _, A, X):- X>=Y,!.
