@@ -60,7 +60,27 @@ max_list_aux([_|Rest], CurrentMax, Max):-
 	max_list_aux(Rest, CurrentMax, Max),!.
 
 game_loop(Board, 1):-
-	writeln('Falta implementar').
+	game_loop_pvp(Board, 1, white).
+
+game_loop_pvp(Board, Depth, white):- /* PVP game loop */
+	print_board(Board),
+	print_player(white),
+	empty_on_board(Board),
+	find_moves(Board, white, MovesList),
+	member(_, MovesList),
+	player_select_move(Move, MovesList),!,
+	put_piece_in(Board, Move, white, FinalBoard),
+	game_loop_pvp(FinalBoard, Depth, black),!.
+
+game_loop_pvp(Board, Depth, black):- /* overloaded PVP game loop */
+	print_board(Board),
+	print_player(black),
+	empty_on_board(Board),
+	find_moves(Board, black, MovesList),
+	member(_, MovesList),
+	player_select_move(Move, MovesList),!,
+	put_piece_in(Board, Move, black, FinalBoard),
+	game_loop_pvp(FinalBoard, Depth, white),!.
 
 game_loop(Board, 2):-
 	game_loop(Board, 1, white).
